@@ -1,5 +1,138 @@
 <?php
-// Standalone Services Directory Page for Zenvora Global Solutions
+/**
+ * Zenvora Global Solutions - Dynamic Services Directory Page
+ * Renders all categories and associated sub-services dynamically from SQL database.
+ * Integrates secure fallbacks in case database has not been initialized.
+ */
+require_once 'components/db_connect.php';
+require_once 'components/settings_helper.php';
+
+// Dynamic Catalog query
+$db_categories = [];
+if (isset($pdo) && $pdo !== null) {
+    try {
+        $db_categories = $pdo->query("SELECT * FROM service_categories ORDER BY sort_order ASC, id ASC")->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        $db_categories = [];
+    }
+}
+
+if (empty($db_categories)) {
+    // Dynamic Fallback in case database is empty or not loaded yet
+    $db_categories = [
+        [
+            'name' => 'Business Startup Setup',
+            'slug' => 'business-startup',
+            'icon' => 'fa-solid fa-rocket',
+            'image_url' => 'assets/images/service_incorporation.jpg',
+            'desc' => 'Form your legal business structure in India. We coordinate MCA name approvals, draft MoA/AoA bylaws, secure director DINs, and handle ROC submissions.',
+            'deliverables' => ['MCA Certificate of Incorporation (COI)', 'Director Identification Numbers (DIN)', 'Company PAN & TAN allocation codes'],
+            'services' => [
+                ['title' => 'Private Limited Company', 'slug' => 'private-limited-company'],
+                ['title' => 'Limited Liability Partnership (LLP)', 'slug' => 'limited-liability-partnership'],
+                ['title' => 'One Person Company (OPC)', 'slug' => 'one-person-company'],
+                ['title' => 'Partnership Firm Setup', 'slug' => 'partnership-firm'],
+                ['title' => 'Proprietorship Registration', 'slug' => 'proprietorship-registration']
+            ]
+        ],
+        [
+            'name' => 'Business Registrations',
+            'slug' => 'registrations',
+            'icon' => 'fa-solid fa-receipt',
+            'image_url' => 'assets/images/hero_bg.jpg',
+            'desc' => 'Secure your government registrations and tax identification codes to trade legally across states, bid for tenders, and claim startup benefits.',
+            'deliverables' => ['GST Registration & HSN classifications', 'MSME Udyam Enrollment Certificate', 'DPIIT Startup Recognition Certificate'],
+            'services' => [
+                ['title' => 'GST Registration', 'slug' => 'gst-registration'],
+                ['title' => 'MSME (Udyam) Registration', 'slug' => 'msme-udyam'],
+                ['title' => 'Startup India DPIIT Recognition', 'slug' => 'startup-india'],
+                ['title' => 'Import Export Code (IEC)', 'slug' => 'import-export-code'],
+                ['title' => 'PF & ESI Registration', 'slug' => 'pf-esi-registration'],
+                ['title' => 'GEM Portal Registration', 'slug' => 'gem-portal-registration']
+            ]
+        ],
+        [
+            'name' => 'Operational Licenses',
+            'slug' => 'licenses',
+            'icon' => 'fa-solid fa-scale-balanced',
+            'image_url' => 'assets/images/hero_bg_4.jpg',
+            'desc' => 'Obtain operational clearances, municipal licenses, and labor department permits needed to open physically, distribute food, or employ contract staff.',
+            'deliverables' => ['FSSAI Food Business License clearance', 'Shop & Establishment Act registration', 'Municipal Trade License approvals'],
+            'services' => [
+                ['title' => 'FSSAI Food License', 'slug' => 'fssai-food-license'],
+                ['title' => 'Trade License (Municipal)', 'slug' => 'trade-license'],
+                ['title' => 'Shop & Establishment (Shop Act)', 'slug' => 'shop-establishment'],
+                ['title' => 'CLRA Contract Labour License', 'slug' => 'clra-contract-labour'],
+                ['title' => 'LWF Labour Welfare Fund', 'slug' => 'lwf-labour-welfare'],
+                ['title' => 'Professional Tax Registration', 'slug' => 'professional-tax']
+            ]
+        ],
+        [
+            'name' => 'Quality Certifications',
+            'slug' => 'certifications',
+            'icon' => 'fa-solid fa-certificate',
+            'image_url' => 'assets/images/service_trademark.jpg',
+            'desc' => 'Protect your brand assets and qualify for corporate contracts by securing internationally recognized ISO certificates and active trademark claims.',
+            'deliverables' => ['Class 3 Digital Signature (DSC) keys', 'Trademark Application Form-A filing', 'ISO Audit & Certification release'],
+            'services' => [
+                ['title' => 'ISO 9001/14001 Certification', 'slug' => 'iso-certification'],
+                ['title' => 'Trademark (TM) Registration', 'slug' => 'trademark-registration'],
+                ['title' => 'BIS Certification & ISI Mark', 'slug' => 'bis-certification'],
+                ['title' => 'Fire Safety NOC Certificate', 'slug' => 'fire-safety-noc'],
+                ['title' => 'Class 3 Digital Signature (DSC)', 'slug' => 'dsc-class-3'],
+                ['title' => 'Make in India Certification', 'slug' => 'make-in-india']
+            ]
+        ],
+        [
+            'name' => 'Tax & Compliance',
+            'slug' => 'tax-compliance',
+            'icon' => 'fa-solid fa-calculator',
+            'image_url' => 'assets/images/service_taxation.jpg',
+            'desc' => 'Maintain flawless corporate books. We process monthly ledgers, file TDS returns, deposit GST monthly returns, and coordinate ROC filings.',
+            'deliverables' => ['Income Tax Return (ITR-6) filings', 'GST return filing reports (GSTR-1/3B)', 'ROC AOC-4 & MGT-7 corporate filings'],
+            'services' => [
+                ['title' => 'Income Tax Return (ITR) Filing', 'slug' => 'itr-filing'],
+                ['title' => 'GST Return Filing', 'slug' => 'gst-return'],
+                ['title' => 'ROC Annual Compliances', 'slug' => 'roc-annual-compliances'],
+                ['title' => 'Corporate Accounting & Bookkeeping', 'slug' => 'accounting-bookkeeping'],
+                ['title' => 'Company Winding Up', 'slug' => 'company-winding-up']
+            ]
+        ],
+        [
+            'name' => 'NGO Registration',
+            'slug' => 'ngo-registration',
+            'icon' => 'fa-solid fa-handshake-angle',
+            'image_url' => 'assets/images/hero_bg_5.jpg',
+            'desc' => 'Incorporate non-profit organizations. We setup Section 8 companies, draft public charitable trust deeds, and secure 12A/80G tax exemptions.',
+            'deliverables' => ['Section 8 MCA Certificate of Incorporation', 'NGO Darpan NITI Aayog enrollment ID', 'Income Tax 12A & 80G approvals'],
+            'services' => [
+                ['title' => 'Trust Registration', 'slug' => 'trust-registration'],
+                ['title' => 'Society Registration', 'slug' => 'society-registration'],
+                ['title' => 'Section 8 Company Setup', 'slug' => 'section-8-company'],
+                ['title' => '12A & 80G Tax Exemptions', 'slug' => '12a-80g-exemption'],
+                ['title' => 'CSR-1 Registration', 'slug' => 'csr-1-registration']
+            ]
+        ]
+    ];
+} else {
+    // Populate services and mock details description/deliverables for each DB category
+    foreach ($db_categories as &$cat) {
+        $srvStmt = $pdo->prepare("SELECT * FROM services WHERE category_id = :cat_id ORDER BY id ASC");
+        $srvStmt->execute([':cat_id' => $cat['id']]);
+        $cat['services'] = $srvStmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        if (!empty($cat['services'])) {
+            $cat['desc'] = "Obtain professional CA/CS assistance for " . $cat['name'] . " registrations, approvals, and legal compliance. Simple process, fast TAT.";
+            $firstSrv = $cat['services'][0];
+            $firstDelivs = json_decode($firstSrv['deliverables_json'], true) ?: [];
+            $cat['deliverables'] = array_slice($firstDelivs, 0, 3);
+        } else {
+            $cat['desc'] = "Outsource your company setup, compliance registers, tax returns, and licensing to Zenvora. Select a category below.";
+            $cat['deliverables'] = ['Official Registration Certificate', 'Complimentary CA consultation call', 'Government challan records'];
+        }
+    }
+    unset($cat);
+}
 ?>
 <!DOCTYPE html>
 <html lang="en" class="scroll-smooth">
@@ -43,72 +176,55 @@
         <!-- Services Detailed Grid Section (No Shadows) -->
         <section class="py-24 bg-white border-b border-slate-100">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-stretch">
-                    
-                    <!-- Service 1: Business Startup Setup -->
+                    <?php foreach ($db_categories as $idx => $cat): ?>
                     <div class="bg-white rounded-3xl border border-slate-200 p-6 flex flex-col justify-between hover:border-brand-500 transition-all duration-300">
                         <div class="space-y-6">
                             <!-- Header Image & Badge -->
                             <div class="relative w-full aspect-[16/10] bg-slate-100 rounded-2xl overflow-hidden border border-slate-100">
-                                <img src="assets/images/service_incorporation.jpg" alt="Business Startup Incorporation" class="w-full h-full object-cover">
+                                <img src="<?php echo htmlspecialchars($cat['image_url']); ?>" alt="<?php echo htmlspecialchars($cat['name']); ?>" class="w-full h-full object-cover">
                                 <div class="absolute top-4 left-4 bg-slate-900/80 backdrop-blur-md text-white text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded">
-                                    01. SETUP
+                                    <?php echo sprintf("%02d", $idx + 1); ?>. <?php echo strtoupper(htmlspecialchars($cat['slug'])); ?>
                                 </div>
                             </div>
 
                             <!-- Title & Short Describe -->
-                            <div class="space-y-2">
+                            <div class="space-y-2 text-left">
                                 <h3 class="text-base font-extrabold text-slate-900 flex items-center gap-2">
-                                    <i class="fa-solid fa-rocket text-brand-500 text-sm"></i> Business Startup Setup
+                                    <i class="<?php echo htmlspecialchars($cat['icon']); ?> text-brand-500 text-sm"></i> <?php echo htmlspecialchars($cat['name']); ?>
                                 </h3>
                                 <p class="text-xs text-slate-550 leading-relaxed font-semibold">
-                                    Form your legal business structure in India. We coordinate MCA name approvals, draft MoA/AoA bylaws, secure director DINs, and handle ROC submissions.
+                                    <?php echo htmlspecialchars($cat['desc']); ?>
                                 </p>
                             </div>
 
-                            <!-- Sub-categories List (Same as home page component) -->
-                            <div class="space-y-1 pt-4 border-t border-slate-100">
+                            <!-- Sub-categories List -->
+                            <div class="space-y-1 pt-4 border-t border-slate-100 text-left">
                                 <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest block mb-2">Available Setup Types:</span>
                                 <div class="space-y-0.5">
-                                    <a href="contact.php" class="flex items-center justify-between py-1.5 text-xs text-slate-700 hover:text-brand-500 border-b border-slate-100/60 transition-colors">
-                                        <span class="font-medium">Private Limited Company</span>
+                                    <?php if (empty($cat['services'])): ?>
+                                    <span class="text-[11px] text-slate-400 font-semibold block italic py-2">No active services setup.</span>
+                                    <?php endif; ?>
+                                    <?php foreach ($cat['services'] as $srv): ?>
+                                    <a href="service-detail.php?slug=<?php echo htmlspecialchars($srv['slug']); ?>" class="flex items-center justify-between py-1.5 text-xs text-slate-700 hover:text-brand-500 border-b border-slate-100/60 transition-colors">
+                                        <span class="font-medium"><?php echo htmlspecialchars($srv['title']); ?></span>
                                         <i class="fa-solid fa-chevron-right text-[8px] text-slate-400"></i>
                                     </a>
-                                    <a href="contact.php" class="flex items-center justify-between py-1.5 text-xs text-slate-700 hover:text-brand-500 border-b border-slate-100/60 transition-colors">
-                                        <span class="font-medium">Limited Liability Partnership (LLP)</span>
-                                        <i class="fa-solid fa-chevron-right text-[8px] text-slate-400"></i>
-                                    </a>
-                                    <a href="contact.php" class="flex items-center justify-between py-1.5 text-xs text-slate-700 hover:text-brand-500 border-b border-slate-100/60 transition-colors">
-                                        <span class="font-medium">One Person Company (OPC)</span>
-                                        <i class="fa-solid fa-chevron-right text-[8px] text-slate-400"></i>
-                                    </a>
-                                    <a href="contact.php" class="flex items-center justify-between py-1.5 text-xs text-slate-700 hover:text-brand-500 border-b border-slate-100/60 transition-colors">
-                                        <span class="font-medium">Partnership Firm Setup</span>
-                                        <i class="fa-solid fa-chevron-right text-[8px] text-slate-400"></i>
-                                    </a>
-                                    <a href="contact.php" class="flex items-center justify-between py-1.5 text-xs text-slate-700 hover:text-brand-500 transition-colors">
-                                        <span class="font-medium">Proprietorship Registration</span>
-                                        <i class="fa-solid fa-chevron-right text-[8px] text-slate-400"></i>
-                                    </a>
+                                    <?php endforeach; ?>
                                 </div>
                             </div>
 
                             <!-- Deliverables points (checklists) -->
-                            <div class="pt-4 border-t border-slate-100 space-y-3">
+                            <div class="pt-4 border-t border-slate-100 space-y-3 text-left">
                                 <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest block">Deliverables Include:</span>
                                 <ul class="space-y-2.5 text-xs text-slate-650 font-semibold">
+                                    <?php foreach (($cat['deliverables'] ?? []) as $deliv): ?>
                                     <li class="flex items-start gap-2">
                                         <i class="fa-solid fa-circle-check text-brand-500 mt-0.5 text-[11px]"></i>
-                                        <span>MCA Certificate of Incorporation (COI)</span>
+                                        <span><?php echo htmlspecialchars($deliv); ?></span>
                                     </li>
-                                    <li class="flex items-start gap-2">
-                                        <i class="fa-solid fa-circle-check text-brand-500 mt-0.5 text-[11px]"></i>
-                                        <span>Director Identification Numbers (DIN)</span>
-                                    </li>
-                                    <li class="flex items-start gap-2">
-                                        <i class="fa-solid fa-circle-check text-brand-500 mt-0.5 text-[11px]"></i>
-                                        <span>Company PAN & TAN allocation codes</span>
-                                    </li>
+                                    <?php endforeach; ?>
                                 </ul>
                             </div>
                         </div>
@@ -116,415 +232,20 @@
                         <!-- CTA button -->
                         <div class="mt-8 pt-5 border-t border-slate-100">
                             <a href="contact.php" class="block w-full text-center py-3 rounded-full text-[11px] font-bold text-white bg-slate-900 hover:bg-slate-800 transition-colors">
-                                Inquire Setup Services <i class="fa-solid fa-chevron-right ml-1.5 text-[9px] text-slate-400"></i>
+                                Inquire Details <i class="fa-solid fa-chevron-right ml-1.5 text-[9px] text-slate-400"></i>
                             </a>
                         </div>
                     </div>
-
-                    <!-- Service 2: Business Registrations -->
-                    <div class="bg-white rounded-3xl border border-slate-200 p-6 flex flex-col justify-between hover:border-brand-500 transition-all duration-300">
-                        <div class="space-y-6">
-                            <!-- Header Image & Badge -->
-                            <div class="relative w-full aspect-[16/10] bg-slate-100 rounded-2xl overflow-hidden border border-slate-100">
-                                <img src="assets/images/hero_bg.jpg" alt="Business Registrations" class="w-full h-full object-cover">
-                                <div class="absolute top-4 left-4 bg-slate-900/80 backdrop-blur-md text-white text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded">
-                                    02. REGISTRATION
-                                </div>
-                            </div>
-
-                            <!-- Title & Short Describe -->
-                            <div class="space-y-2">
-                                <h3 class="text-base font-extrabold text-slate-900 flex items-center gap-2">
-                                    <i class="fa-solid fa-receipt text-brand-500 text-sm"></i> Business Registrations
-                                </h3>
-                                <p class="text-xs text-slate-550 leading-relaxed font-semibold">
-                                    Secure your government registrations and tax identification codes to trade legally across states, bid for tenders, and claim startup benefits.
-                                </p>
-                            </div>
-
-                            <!-- Sub-categories List (Same as home page component) -->
-                            <div class="space-y-1 pt-4 border-t border-slate-100">
-                                <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest block mb-2">Available Tax Registrations:</span>
-                                <div class="space-y-0.5">
-                                    <a href="contact.php" class="flex items-center justify-between py-1.5 text-xs text-slate-700 hover:text-brand-500 border-b border-slate-100/60 transition-colors">
-                                        <span class="font-medium">GST Registration</span>
-                                        <i class="fa-solid fa-chevron-right text-[8px] text-slate-400"></i>
-                                    </a>
-                                    <a href="contact.php" class="flex items-center justify-between py-1.5 text-xs text-slate-700 hover:text-brand-500 border-b border-slate-100/60 transition-colors">
-                                        <span class="font-medium">MSME (Udyam) Registration</span>
-                                        <i class="fa-solid fa-chevron-right text-[8px] text-slate-400"></i>
-                                    </a>
-                                    <a href="contact.php" class="flex items-center justify-between py-1.5 text-xs text-slate-700 hover:text-brand-500 border-b border-slate-100/60 transition-colors">
-                                        <span class="font-medium">Startup India DPIIT Recognition</span>
-                                        <i class="fa-solid fa-chevron-right text-[8px] text-slate-400"></i>
-                                    </a>
-                                    <a href="contact.php" class="flex items-center justify-between py-1.5 text-xs text-slate-700 hover:text-brand-500 border-b border-slate-100/60 transition-colors">
-                                        <span class="font-medium">Import Export Code (IEC)</span>
-                                        <i class="fa-solid fa-chevron-right text-[8px] text-slate-400"></i>
-                                    </a>
-                                    <a href="contact.php" class="flex items-center justify-between py-1.5 text-xs text-slate-700 hover:text-brand-500 transition-colors">
-                                        <span class="font-medium">PF, ESI & GEM Portal Registration</span>
-                                        <i class="fa-solid fa-chevron-right text-[8px] text-slate-400"></i>
-                                    </a>
-                                </div>
-                            </div>
-
-                            <!-- Deliverables points (checklists) -->
-                            <div class="pt-4 border-t border-slate-100 space-y-3">
-                                <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest block">Deliverables Include:</span>
-                                <ul class="space-y-2.5 text-xs text-slate-650 font-semibold">
-                                    <li class="flex items-start gap-2">
-                                        <i class="fa-solid fa-circle-check text-brand-500 mt-0.5 text-[11px]"></i>
-                                        <span>GST Registration & HSN classifications</span>
-                                    </li>
-                                    <li class="flex items-start gap-2">
-                                        <i class="fa-solid fa-circle-check text-brand-500 mt-0.5 text-[11px]"></i>
-                                        <span>MSME Udyam Enrollment Certificate</span>
-                                    </li>
-                                    <li class="flex items-start gap-2">
-                                        <i class="fa-solid fa-circle-check text-brand-500 mt-0.5 text-[11px]"></i>
-                                        <span>DPIIT Startup Recognition Certificate</span>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-
-                        <!-- CTA button -->
-                        <div class="mt-8 pt-5 border-t border-slate-100">
-                            <a href="contact.php" class="block w-full text-center py-3 rounded-full text-[11px] font-bold text-white bg-slate-900 hover:bg-slate-800 transition-colors">
-                                Inquire Registrations <i class="fa-solid fa-chevron-right ml-1.5 text-[9px] text-slate-400"></i>
-                            </a>
-                        </div>
-                    </div>
-
-                    <!-- Service 3: Operational Licenses -->
-                    <div class="bg-white rounded-3xl border border-slate-200 p-6 flex flex-col justify-between hover:border-brand-500 transition-all duration-300">
-                        <div class="space-y-6">
-                            <!-- Header Image & Badge -->
-                            <div class="relative w-full aspect-[16/10] bg-slate-100 rounded-2xl overflow-hidden border border-slate-100">
-                                <img src="assets/images/hero_bg_4.jpg" alt="Business Licenses" class="w-full h-full object-cover">
-                                <div class="absolute top-4 left-4 bg-slate-900/80 backdrop-blur-md text-white text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded">
-                                    03. LICENSING
-                                </div>
-                            </div>
-
-                            <!-- Title & Short Describe -->
-                            <div class="space-y-2">
-                                <h3 class="text-base font-extrabold text-slate-900 flex items-center gap-2">
-                                    <i class="fa-solid fa-scale-balanced text-brand-500 text-sm"></i> Operational Licenses
-                                </h3>
-                                <p class="text-xs text-slate-550 leading-relaxed font-semibold">
-                                    Obtain operational clearances, municipal licenses, and labor department permits needed to open physically, distribute food, or employ contract staff.
-                                </p>
-                            </div>
-
-                            <!-- Sub-categories List (Same as home page component) -->
-                            <div class="space-y-1 pt-4 border-t border-slate-100">
-                                <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest block mb-2">Available Licenses:</span>
-                                <div class="space-y-0.5">
-                                    <a href="contact.php" class="flex items-center justify-between py-1.5 text-xs text-slate-700 hover:text-brand-500 border-b border-slate-100/60 transition-colors">
-                                        <span class="font-medium">FSSAI Food License</span>
-                                        <i class="fa-solid fa-chevron-right text-[8px] text-slate-400"></i>
-                                    </a>
-                                    <a href="contact.php" class="flex items-center justify-between py-1.5 text-xs text-slate-700 hover:text-brand-500 border-b border-slate-100/60 transition-colors">
-                                        <span class="font-medium">Trade License (Municipal)</span>
-                                        <i class="fa-solid fa-chevron-right text-[8px] text-slate-400"></i>
-                                    </a>
-                                    <a href="contact.php" class="flex items-center justify-between py-1.5 text-xs text-slate-700 hover:text-brand-500 border-b border-slate-100/60 transition-colors">
-                                        <span class="font-medium">Shop & Establishment (Shop Act)</span>
-                                        <i class="fa-solid fa-chevron-right text-[8px] text-slate-400"></i>
-                                    </a>
-                                    <a href="contact.php" class="flex items-center justify-between py-1.5 text-xs text-slate-700 hover:text-brand-500 border-b border-slate-100/60 transition-colors">
-                                        <span class="font-medium">Contract Labour (CLRA) License</span>
-                                        <i class="fa-solid fa-chevron-right text-[8px] text-slate-400"></i>
-                                    </a>
-                                    <a href="contact.php" class="flex items-center justify-between py-1.5 text-xs text-slate-700 hover:text-brand-500 transition-colors">
-                                        <span class="font-medium">PT & Labour Welfare Fund (LWF)</span>
-                                        <i class="fa-solid fa-chevron-right text-[8px] text-slate-400"></i>
-                                    </a>
-                                </div>
-                            </div>
-
-                            <!-- Deliverables points (checklists) -->
-                            <div class="pt-4 border-t border-slate-100 space-y-3">
-                                <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest block">Deliverables Include:</span>
-                                <ul class="space-y-2.5 text-xs text-slate-650 font-semibold">
-                                    <li class="flex items-start gap-2">
-                                        <i class="fa-solid fa-circle-check text-brand-500 mt-0.5 text-[11px]"></i>
-                                        <span>FSSAI Food Business License clearance</span>
-                                    </li>
-                                    <li class="flex items-start gap-2">
-                                        <i class="fa-solid fa-circle-check text-brand-500 mt-0.5 text-[11px]"></i>
-                                        <span>Shop & Establishment Act registration</span>
-                                    </li>
-                                    <li class="flex items-start gap-2">
-                                        <i class="fa-solid fa-circle-check text-brand-500 mt-0.5 text-[11px]"></i>
-                                        <span>Municipal Trade License approvals</span>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-
-                        <!-- CTA button -->
-                        <div class="mt-8 pt-5 border-t border-slate-100">
-                            <a href="contact.php" class="block w-full text-center py-3 rounded-full text-[11px] font-bold text-white bg-slate-900 hover:bg-slate-800 transition-colors">
-                                Inquire Licensing <i class="fa-solid fa-chevron-right ml-1.5 text-[9px] text-slate-400"></i>
-                            </a>
-                        </div>
-                    </div>
-
-                    <!-- Service 4: Certifications & Brand IP -->
-                    <div class="bg-white rounded-3xl border border-slate-200 p-6 flex flex-col justify-between hover:border-brand-500 transition-all duration-300">
-                        <div class="space-y-6">
-                            <!-- Header Image & Badge -->
-                            <div class="relative w-full aspect-[16/10] bg-slate-100 rounded-2xl overflow-hidden border border-slate-100">
-                                <img src="assets/images/service_trademark.jpg" alt="Trademark & Certifications" class="w-full h-full object-cover">
-                                <div class="absolute top-4 left-4 bg-slate-900/80 backdrop-blur-md text-white text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded">
-                                    04. BRAND & IP
-                                </div>
-                            </div>
-
-                            <!-- Title & Short Describe -->
-                            <div class="space-y-2">
-                                <h3 class="text-base font-extrabold text-slate-900 flex items-center gap-2">
-                                    <i class="fa-solid fa-certificate text-brand-500 text-sm"></i> Quality Certifications
-                                </h3>
-                                <p class="text-xs text-slate-550 leading-relaxed font-semibold">
-                                    Protect your brand assets and qualify for corporate contracts by securing internationally recognized ISO certificates and active trademark claims.
-                                </p>
-                            </div>
-
-                            <!-- Sub-categories List (Same as home page component) -->
-                            <div class="space-y-1 pt-4 border-t border-slate-100">
-                                <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest block mb-2">Available Certifications:</span>
-                                <div class="space-y-0.5">
-                                    <a href="contact.php" class="flex items-center justify-between py-1.5 text-xs text-slate-700 hover:text-brand-500 border-b border-slate-100/60 transition-colors">
-                                        <span class="font-medium">ISO 9001, 14001, 27001</span>
-                                        <i class="fa-solid fa-chevron-right text-[8px] text-slate-400"></i>
-                                    </a>
-                                    <a href="contact.php" class="flex items-center justify-between py-1.5 text-xs text-slate-700 hover:text-brand-500 border-b border-slate-100/60 transition-colors">
-                                        <span class="font-medium">Trademark (TM) Registration</span>
-                                        <i class="fa-solid fa-chevron-right text-[8px] text-slate-400"></i>
-                                    </a>
-                                    <a href="contact.php" class="flex items-center justify-between py-1.5 text-xs text-slate-700 hover:text-brand-500 border-b border-slate-100/60 transition-colors">
-                                        <span class="font-medium">BIS Certification & ISI Mark</span>
-                                        <i class="fa-solid fa-chevron-right text-[8px] text-slate-400"></i>
-                                    </a>
-                                    <a href="contact.php" class="flex items-center justify-between py-1.5 text-xs text-slate-700 hover:text-brand-500 border-b border-slate-100/60 transition-colors">
-                                        <span class="font-medium">Class 3 Digital Signature (DSC)</span>
-                                        <i class="fa-solid fa-chevron-right text-[8px] text-slate-400"></i>
-                                    </a>
-                                    <a href="contact.php" class="flex items-center justify-between py-1.5 text-xs text-slate-700 hover:text-brand-500 transition-colors">
-                                        <span class="font-medium">Fire NOC & Make in India certification</span>
-                                        <i class="fa-solid fa-chevron-right text-[8px] text-slate-400"></i>
-                                    </a>
-                                </div>
-                            </div>
-
-                            <!-- Deliverables points (checklists) -->
-                            <div class="pt-4 border-t border-slate-100 space-y-3">
-                                <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest block">Deliverables Include:</span>
-                                <ul class="space-y-2.5 text-xs text-slate-650 font-semibold">
-                                    <li class="flex items-start gap-2">
-                                        <i class="fa-solid fa-circle-check text-brand-500 mt-0.5 text-[11px]"></i>
-                                        <span>Trademark (TM) filing & objection responses</span>
-                                    </li>
-                                    <li class="flex items-start gap-2">
-                                        <i class="fa-solid fa-circle-check text-brand-500 mt-0.5 text-[11px]"></i>
-                                        <span>ISO Quality Management audit credentials</span>
-                                    </li>
-                                    <li class="flex items-start gap-2">
-                                        <i class="fa-solid fa-circle-check text-brand-500 mt-0.5 text-[11px]"></i>
-                                        <span>BIS Certification & ISI Mark filings</span>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-
-                        <!-- CTA button -->
-                        <div class="mt-8 pt-5 border-t border-slate-100">
-                            <a href="contact.php" class="block w-full text-center py-3 rounded-full text-[11px] font-bold text-white bg-slate-900 hover:bg-slate-800 transition-colors">
-                                Inquire Brand IP <i class="fa-solid fa-chevron-right ml-1.5 text-[9px] text-slate-400"></i>
-                            </a>
-                        </div>
-                    </div>
-
-                    <!-- Service 5: Tax & Compliances -->
-                    <div class="bg-white rounded-3xl border border-slate-200 p-6 flex flex-col justify-between hover:border-brand-500 transition-all duration-300">
-                        <div class="space-y-6">
-                            <!-- Header Image & Badge -->
-                            <div class="relative w-full aspect-[16/10] bg-slate-100 rounded-2xl overflow-hidden border border-slate-100">
-                                <img src="assets/images/service_taxation.jpg" alt="Taxation compliances" class="w-full h-full object-cover">
-                                <div class="absolute top-4 left-4 bg-slate-900/80 backdrop-blur-md text-white text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded">
-                                    05. TAX & AUDIT
-                                </div>
-                            </div>
-
-                            <!-- Title & Short Describe -->
-                            <div class="space-y-2">
-                                <h3 class="text-base font-extrabold text-slate-900 flex items-center gap-2">
-                                    <i class="fa-solid fa-calculator text-brand-500 text-sm"></i> Tax & Compliance
-                                </h3>
-                                <p class="text-xs text-slate-550 leading-relaxed font-semibold">
-                                    Outsource bookkeeping, monthly payroll tax deductions, corporate income tax filing, and annual ROC disclosures to our expert team of CAs.
-                                </p>
-                            </div>
-
-                            <!-- Sub-categories List (Same as home page component) -->
-                            <div class="space-y-1 pt-4 border-t border-slate-100">
-                                <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest block mb-2">Available Compliance Programs:</span>
-                                <div class="space-y-0.5">
-                                    <a href="contact.php" class="flex items-center justify-between py-1.5 text-xs text-slate-700 hover:text-brand-500 border-b border-slate-100/60 transition-colors">
-                                        <span class="font-medium">Income Tax Return (ITR) Filing</span>
-                                        <i class="fa-solid fa-chevron-right text-[8px] text-slate-400"></i>
-                                    </a>
-                                    <a href="contact.php" class="flex items-center justify-between py-1.5 text-xs text-slate-700 hover:text-brand-500 border-b border-slate-100/60 transition-colors">
-                                        <span class="font-medium">GST Return Filing (Monthly/Quarterly)</span>
-                                        <i class="fa-solid fa-chevron-right text-[8px] text-slate-400"></i>
-                                    </a>
-                                    <a href="contact.php" class="flex items-center justify-between py-1.5 text-xs text-slate-700 hover:text-brand-500 border-b border-slate-100/60 transition-colors">
-                                        <span class="font-medium">ROC Annual Compliances (MCA)</span>
-                                        <i class="fa-solid fa-chevron-right text-[8px] text-slate-400"></i>
-                                    </a>
-                                    <a href="contact.php" class="flex items-center justify-between py-1.5 text-xs text-slate-700 hover:text-brand-500 border-b border-slate-100/60 transition-colors">
-                                        <span class="font-medium">Corporate Accounting & Bookkeeping</span>
-                                        <i class="fa-solid fa-chevron-right text-[8px] text-slate-400"></i>
-                                    </a>
-                                    <a href="contact.php" class="flex items-center justify-between py-1.5 text-xs text-slate-700 hover:text-brand-500 transition-colors">
-                                        <span class="font-medium">PF & ESI Monthly Returns & Winding Up</span>
-                                        <i class="fa-solid fa-chevron-right text-[8px] text-slate-400"></i>
-                                    </a>
-                                </div>
-                            </div>
-
-                            <!-- Deliverables points (checklists) -->
-                            <div class="pt-4 border-t border-slate-100 space-y-3">
-                                <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest block">Deliverables Include:</span>
-                                <ul class="space-y-2.5 text-xs text-slate-650 font-semibold">
-                                    <li class="flex items-start gap-2">
-                                        <i class="fa-solid fa-circle-check text-brand-500 mt-0.5 text-[11px]"></i>
-                                        <span>Monthly/Quarterly GST filings (GSTR-1/3B)</span>
-                                    </li>
-                                    <li class="flex items-start gap-2">
-                                        <i class="fa-solid fa-circle-check text-brand-500 mt-0.5 text-[11px]"></i>
-                                        <span>Annual Corporate Income Tax (ITR-6) filing</span>
-                                    </li>
-                                    <li class="flex items-start gap-2">
-                                        <i class="fa-solid fa-circle-check text-brand-500 mt-0.5 text-[11px]"></i>
-                                        <span>ROC Annual Filings (Form AOC-4 & MGT-7)</span>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-
-                        <!-- CTA button -->
-                        <div class="mt-8 pt-5 border-t border-slate-100">
-                            <a href="contact.php" class="block w-full text-center py-3 rounded-full text-[11px] font-bold text-white bg-slate-900 hover:bg-slate-800 transition-colors">
-                                Inquire Tax Filings <i class="fa-solid fa-chevron-right ml-1.5 text-[9px] text-slate-400"></i>
-                            </a>
-                        </div>
-                    </div>
-
-                    <!-- Service 6: NGO & Social Sectors Setup -->
-                    <div class="bg-white rounded-3xl border border-slate-200 p-6 flex flex-col justify-between hover:border-brand-500 transition-all duration-300">
-                        <div class="space-y-6">
-                            <!-- Header Image & Badge -->
-                            <div class="relative w-full aspect-[16/10] bg-slate-100 rounded-2xl overflow-hidden border border-slate-100">
-                                <img src="assets/images/hero_bg_5.jpg" alt="NGO Incorporation" class="w-full h-full object-cover">
-                                <div class="absolute top-4 left-4 bg-slate-900/80 backdrop-blur-md text-white text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded">
-                                    06. NON-PROFIT
-                                </div>
-                            </div>
-
-                            <!-- Title & Short Describe -->
-                            <div class="space-y-2">
-                                <h3 class="text-base font-extrabold text-slate-900 flex items-center gap-2">
-                                    <i class="fa-solid fa-handshake-angle text-brand-500 text-sm"></i> NGO Registration
-                                </h3>
-                                <p class="text-xs text-slate-550 leading-relaxed font-semibold">
-                                    Register non-profit entities, public trusts, and social welfare societies. We handle tax exclusions, NGO Darpan IDs, and CSR project setups.
-                                </p>
-                            </div>
-
-                            <!-- Sub-categories List (Same as home page component) -->
-                            <div class="space-y-1 pt-4 border-t border-slate-100">
-                                <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest block mb-2">Available Non-Profit Types:</span>
-                                <div class="space-y-0.5">
-                                    <a href="contact.php" class="flex items-center justify-between py-1.5 text-xs text-slate-700 hover:text-brand-500 border-b border-slate-100/60 transition-colors">
-                                        <span class="font-medium">Section 8 Company Incorporation</span>
-                                        <i class="fa-solid fa-chevron-right text-[8px] text-slate-400"></i>
-                                    </a>
-                                    <a href="contact.php" class="flex items-center justify-between py-1.5 text-xs text-slate-700 hover:text-brand-500 border-b border-slate-100/60 transition-colors">
-                                        <span class="font-medium">Trust Registration (Deed draft)</span>
-                                        <i class="fa-solid fa-chevron-right text-[8px] text-slate-400"></i>
-                                    </a>
-                                    <a href="contact.php" class="flex items-center justify-between py-1.5 text-xs text-slate-700 hover:text-brand-500 border-b border-slate-100/60 transition-colors">
-                                        <span class="font-medium">Society Registration (Bylaws setup)</span>
-                                        <i class="fa-solid fa-chevron-right text-[8px] text-slate-400"></i>
-                                    </a>
-                                    <a href="contact.php" class="flex items-center justify-between py-1.5 text-xs text-slate-700 hover:text-brand-500 border-b border-slate-100/60 transition-colors">
-                                        <span class="font-medium">12A & 80G Tax Exemption Certificates</span>
-                                        <i class="fa-solid fa-chevron-right text-[8px] text-slate-400"></i>
-                                    </a>
-                                    <a href="contact.php" class="flex items-center justify-between py-1.5 text-xs text-slate-700 hover:text-brand-500 transition-colors">
-                                        <span class="font-medium">Darpan ID, CSR-1 & FCRA Registration</span>
-                                        <i class="fa-solid fa-chevron-right text-[8px] text-slate-400"></i>
-                                    </a>
-                                </div>
-                            </div>
-
-                            <!-- Deliverables points (checklists) -->
-                            <div class="pt-4 border-t border-slate-100 space-y-3">
-                                <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest block">Deliverables Include:</span>
-                                <ul class="space-y-2.5 text-xs text-slate-650 font-semibold">
-                                    <li class="flex items-start gap-2">
-                                        <i class="fa-solid fa-circle-check text-brand-500 mt-0.5 text-[11px]"></i>
-                                        <span>Section 8 Company Incorporation certificate</span>
-                                    </li>
-                                    <li class="flex items-start gap-2">
-                                        <i class="fa-solid fa-circle-check text-brand-500 mt-0.5 text-[11px]"></i>
-                                        <span>Public/Private Trust Deed registration</span>
-                                    </li>
-                                    <li class="flex items-start gap-2">
-                                        <i class="fa-solid fa-circle-check text-brand-500 mt-0.5 text-[11px]"></i>
-                                        <span>12A & 80G Tax Exemption certification</span>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-
-                        <!-- CTA button -->
-                        <div class="mt-8 pt-5 border-t border-slate-100">
-                            <a href="contact.php" class="block w-full text-center py-3 rounded-full text-[11px] font-bold text-white bg-slate-900 hover:bg-slate-800 transition-colors">
-                                Inquire NGO Services <i class="fa-solid fa-chevron-right ml-1.5 text-[9px] text-slate-400"></i>
-                            </a>
-                        </div>
-                    </div>
-
+                    <?php endforeach; ?>
                 </div>
-            </div>
-        </section>
 
-        <!-- Advisory Call section (No Shadows) -->
-        <section class="py-24 bg-slate-50 text-center">
-            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
-                <h2 class="text-3xl font-extrabold text-slate-900 tracking-tight">Need a custom compliance scope?</h2>
-                <p class="text-slate-500 text-sm max-w-xl mx-auto font-semibold">
-                    Schedule a free 15-minute scoping call with Priyanka or CA Tushar. We'll map out your company registration, municipal licenses, and ROC filing milestones.
-                </p>
-                <div class="pt-4">
-                    <a href="contact.php" class="inline-flex items-center justify-center px-8 py-3.5 rounded-full text-xs font-bold text-white accent-gradient hover:opacity-95 transition-all">
-                        <i class="fa-solid fa-calendar-check mr-2"></i> Book Free Consultation Call
-                    </a>
-                </div>
             </div>
         </section>
 
     </main>
 
-    <!-- Global Footer Navigation -->
+    <!-- Global Footer -->
     <?php include_once 'components/footer.php'; ?>
 
 </body>
-
 </html>

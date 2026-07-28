@@ -1,6 +1,17 @@
 <?php
 // Standalone Blogs Catalog Page for Zenvora Global Solutions
-require_once 'components/blog_data.php';
+require_once 'components/db_connect.php';
+require_once 'components/settings_helper.php';
+
+$blogs = [];
+if ($pdo !== null) {
+    try {
+        $stmt = $pdo->query("SELECT * FROM blogs WHERE status = 'Published' ORDER BY id DESC");
+        $blogs = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        // Safe fallback
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="en" class="scroll-smooth">

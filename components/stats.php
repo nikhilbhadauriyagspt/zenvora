@@ -26,8 +26,8 @@
                 <div class="flex flex-col md:flex-row md:items-start justify-between gap-6">
                     <div class="space-y-2">
                         <span class="text-xs font-bold text-brand-600 uppercase tracking-wider">Scale of Operations</span>
-                        <h3 class="text-4xl sm:text-5xl font-black text-slate-900 leading-none">1,200+</h3>
-                        <p class="text-xs text-slate-500 font-medium">Startups incorporated and legally compliant across India.</p>
+                        <h3 class="text-4xl sm:text-5xl font-black text-slate-900 leading-none"><?php echo htmlspecialchars(getWebSetting('stat_ops_count') ?: '1,200+'); ?></h3>
+                        <p class="text-xs text-slate-500 font-medium"><?php echo htmlspecialchars(getWebSetting('stat_ops_label') ?: 'Startups incorporated and legally compliant across India.'); ?></p>
                     </div>
                     
                     <!-- Customer Avatars overlap stack -->
@@ -54,8 +54,8 @@
             <div class="bg-slate-50/50 rounded-3xl p-8 border border-slate-200/50 flex flex-col justify-between items-start transition-all duration-300 hover:border-brand-500/30">
                 <div class="space-y-2">
                     <span class="text-xs font-bold text-brand-600 uppercase tracking-wider">Filing Accuracy</span>
-                    <h3 class="text-4xl font-black text-slate-900 leading-none">99.8%</h3>
-                    <p class="text-xs text-slate-550 font-medium">Compliance SLA success rate with zero late-fee liabilities.</p>
+                    <h3 class="text-4xl font-black text-slate-900 leading-none"><?php echo htmlspecialchars(getWebSetting('stat_accuracy_count') ?: '99.8%'); ?></h3>
+                    <p class="text-xs text-slate-550 font-medium"><?php echo htmlspecialchars(getWebSetting('stat_accuracy_label') ?: 'Compliance SLA success rate with zero late-fee liabilities.'); ?></p>
                 </div>
                 
                 <!-- Circular Radial Gauge Visual (CSS border tricks) -->
@@ -70,8 +70,8 @@
             <div class="bg-slate-50/50 rounded-3xl p-8 border border-slate-200/50 flex flex-col justify-between items-start transition-all duration-300 hover:border-brand-500/30">
                 <div class="space-y-2">
                     <span class="text-xs font-bold text-brand-600 uppercase tracking-wider">Legal Panel</span>
-                    <h3 class="text-4xl font-black text-slate-900 leading-none">45+</h3>
-                    <p class="text-xs text-slate-550 font-medium">Chartered Accountants, Lawyers & CSs at your service.</p>
+                    <h3 class="text-4xl font-black text-slate-900 leading-none"><?php echo htmlspecialchars(getWebSetting('stat_panel_count') ?: '45+'); ?></h3>
+                    <p class="text-xs text-slate-555 font-medium"><?php echo htmlspecialchars(getWebSetting('stat_panel_label') ?: 'Chartered Accountants, Lawyers & CSs at your service.'); ?></p>
                 </div>
                 
                 <!-- Live Status Badge visual -->
@@ -88,8 +88,8 @@
             <div class="md:col-span-2 bg-slate-50/50 rounded-3xl p-8 border border-slate-200/50 flex flex-col justify-between transition-all duration-300 hover:border-brand-500/30">
                 <div class="space-y-2">
                     <span class="text-xs font-bold text-brand-600 uppercase tracking-wider">Execution Speed</span>
-                    <h3 class="text-4xl sm:text-5xl font-black text-slate-900 leading-none">24 Hours</h3>
-                    <p class="text-xs text-slate-550 font-medium">Average turnaround time for company name approvals and filings.</p>
+                    <h3 class="text-4xl sm:text-5xl font-black text-slate-900 leading-none"><?php echo htmlspecialchars(getWebSetting('stat_speed_count') ?: '24 Hours'); ?></h3>
+                    <p class="text-xs text-slate-555 font-medium"><?php echo htmlspecialchars(getWebSetting('stat_speed_label') ?: 'Average turnaround time for company name approvals and filings.'); ?></p>
                 </div>
 
                 <!-- Process speed comparison timeline bars -->

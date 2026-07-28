@@ -1,27 +1,22 @@
 <?php
 /**
- * Zenvora Global Solutions - Admin Panel Dashboard
+ * Zenvora Global Solutions - Admin Panel Enquiries Manager
  */
 session_start();
-require_once '../components/db_connect.php';
-require_once '../components/settings_helper.php';
+require_once __DIR__ . '/../components/db_connect.php';
+require_once __DIR__ . '/../components/settings_helper.php';
 
-// 1. Session verification: Redirect to login if not authenticated
+// Auth Guard: Admin session must be active
 if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true || !isset($_SESSION['admin_username'])) {
-    header('Location: login.php');
+    header("Location: login.php");
     exit;
 }
 
 $adminUsername = $_SESSION['admin_username'] ?? 'Admin';
-$adminRole = $_SESSION['admin_role'] ?? 'admin';
+$message = '';
+$messageType = 'success';
 
-// Redirect back helper
-function refreshPage() {
-    header('Location: admin.php');
-    exit;
-}
-
-// 2. Action Handlers (Database Updates)
+// Action Handlers (Database Updates)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $pdo !== null) {
     // A. Update Enquiry Status
     if (isset($_POST['action']) && $_POST['action'] === 'update_status') {
@@ -33,11 +28,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $pdo !== null) {
             try {
                 $stmt = $pdo->prepare("UPDATE enquiries SET status = :status WHERE id = :id");
                 $stmt->execute([':status' => $newStatus, ':id' => $enquiryId]);
+                $message = "Enquiry status updated successfully!";
             } catch (PDOException $e) {
-                // Silently fail or log
+                $message = "Database Error: " . $e->getMessage();
+                $messageType = 'error';
             }
         }
-        refreshPage();
     }
     
     // B. Delete Enquiry Lead
@@ -46,53 +42,87 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $pdo !== null) {
         try {
             $stmt = $pdo->prepare("DELETE FROM enquiries WHERE id = :id");
             $stmt->execute([':id' => $enquiryId]);
+            $message = "Enquiry record deleted successfully!";
         } catch (PDOException $e) {
-            // Silently fail or log
+            $message = "Database Error: " . $e->getMessage();
+            $messageType = 'error';
         }
-        refreshPage();
     }
 }
 
-// 3. Fetch KPI Metrics
-$totalLeads = 0;
-$pendingLeads = 0;
-$inProgressLeads = 0;
-$resolvedLeads = 0;
+// Read filters from GET query parameters
+$filterStatus = trim($_GET['status'] ?? '');
+$filterService = trim($_GET['service'] ?? '');
+$filterSearch = trim($_GET['search'] ?? '');
+$filterStartDate = trim($_GET['start_date'] ?? '');
+$filterEndDate = trim($_GET['end_date'] ?? '');
+
 $enquiriesList = [];
+$distinctServices = [];
 
 if ($pdo !== null) {
     try {
-        // Enquiries Query for KPIs
-        $stmtAll = $pdo->prepare("SELECT status FROM enquiries");
-        $stmtAll->execute();
-        $allLeads = $stmtAll->fetchAll();
-        
-        $totalLeads = count($allLeads);
-        foreach ($allLeads as $item) {
-            if ($item['status'] === 'Pending') $pendingLeads++;
-            elseif ($item['status'] === 'In Progress') $inProgressLeads++;
-            elseif ($item['status'] === 'Resolved') $resolvedLeads++;
+        // Fetch distinct services for dynamic dropdown selection list
+        $distinctStmt = $pdo->query("SELECT DISTINCT service FROM enquiries ORDER BY service ASC");
+        $distinctServices = $distinctStmt->fetchAll(PDO::FETCH_COLUMN);
+
+        // Build dynamic database filtering SQL statement
+        $sql = "SELECT * FROM enquiries WHERE 1=1";
+        $sqlParams = [];
+
+        if ($filterStatus !== '') {
+            $sql .= " AND status = :status";
+            $sqlParams[':status'] = $filterStatus;
         }
-        
-        // Fetch only 5 recent enquiries for dashboard table
-        $stmtRecent = $pdo->prepare("SELECT * FROM enquiries ORDER BY created_at DESC LIMIT 5");
-        $stmtRecent->execute();
-        $enquiriesList = $stmtRecent->fetchAll();
+
+        if ($filterService !== '') {
+            $sql .= " AND service = :service";
+            $sqlParams[':service'] = $filterService;
+        }
+
+        if ($filterStartDate !== '') {
+            $sql .= " AND DATE(created_at) >= :start_date";
+            $sqlParams[':start_date'] = $filterStartDate;
+        }
+
+        if ($filterEndDate !== '') {
+            $sql .= " AND DATE(created_at) <= :end_date";
+            $sqlParams[':end_date'] = $filterEndDate;
+        }
+
+        if ($filterSearch !== '') {
+            $sql .= " AND (name LIKE :search1 OR email LIKE :search2 OR phone LIKE :search3 OR message LIKE :search4)";
+            $searchWildcard = '%' . $filterSearch . '%';
+            $sqlParams[':search1'] = $searchWildcard;
+            $sqlParams[':search2'] = $searchWildcard;
+            $sqlParams[':search3'] = $searchWildcard;
+            $sqlParams[':search4'] = $searchWildcard;
+        }
+
+        $sql .= " ORDER BY created_at DESC";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($sqlParams);
+        $enquiriesList = $stmt->fetchAll(PDO::FETCH_ASSOC);
     } catch (PDOException $e) {
-        // Silently fail
+        $message = "Database Error: " . $e->getMessage();
+        $messageType = 'error';
     }
 }
 ?>
 <!DOCTYPE html>
-<html lang="en" class="h-full bg-slate-50">
-
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard | Zenvora Global Solutions</title>
-    
-    <!-- Load Head dependencies (Tailwind CDN, Fonts, Font Awesome) -->
-    <?php include_once '../components/head.php'; ?>
+    <title>Customer Enquiries | Zenvora Admin</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet">
+    <!-- Font Awesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -118,12 +148,10 @@ if ($pdo !== null) {
         }
     </script>
 </head>
-
-<body class="h-full font-sans antialiased text-slate-600 selection:bg-brand-500 selection:text-white">
+<body class="h-full font-sans antialiased text-slate-650 selection:bg-brand-500 selection:text-white">
 
     <div class="flex h-screen overflow-hidden">
-        
-        <!-- Sidebar Navigation (Collapsible, w-64 -> w-0) -->
+        <!-- Sidebar Navigation -->
         <aside id="admin-sidebar" class="w-64 bg-slate-900 flex flex-col justify-between transition-all duration-300 ease-in-out flex-shrink-0 z-30 overflow-hidden relative border-r border-slate-850 p-6">
             <div class="flex flex-col flex-grow space-y-8">
                 <!-- Branding -->
@@ -138,24 +166,24 @@ if ($pdo !== null) {
                 <!-- Nav list -->
                 <nav class="flex-1 space-y-1">
                     <span class="block px-3 py-1 text-[9px] font-extrabold text-slate-500 uppercase tracking-widest mb-2 whitespace-nowrap">Metrics & Leads</span>
-                    <a href="admin.php" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold hover:bg-slate-800 hover:text-white transition-all <?php echo (basename($_SERVER['PHP_SELF']) === 'admin.php') ? 'bg-brand-500/10 text-brand-400 border border-brand-500/20' : 'text-slate-400'; ?>">
+                    <a href="admin.php" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold hover:bg-slate-800 hover:text-white transition-all text-slate-400">
                         <i class="fa-solid fa-chart-line text-sm"></i> <span class="whitespace-nowrap">Dashboard Overview</span>
                     </a>
-                    <a href="enquiries.php" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold hover:bg-slate-800 hover:text-white transition-all <?php echo (basename($_SERVER['PHP_SELF']) === 'enquiries.php') ? 'bg-brand-500/10 text-brand-400 border border-brand-500/20' : 'text-slate-400'; ?>">
+                    <a href="enquiries.php" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold hover:bg-slate-800 hover:text-white transition-all bg-brand-500/10 text-brand-400 border border-brand-500/20">
                         <i class="fa-solid fa-envelope-open-text text-sm"></i> <span class="whitespace-nowrap">Customer Enquiries</span>
                     </a>
                     
                     <span class="block px-3 py-1 text-[9px] font-extrabold text-slate-500 uppercase tracking-widest mt-6 mb-2 whitespace-nowrap">Website Settings</span>
-                    <a href="settings.php" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold hover:bg-slate-800 hover:text-white transition-all <?php echo (basename($_SERVER['PHP_SELF']) === 'settings.php') ? 'bg-brand-500/10 text-brand-400 border border-brand-500/20' : 'text-slate-400'; ?>">
+                    <a href="settings.php" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold hover:bg-slate-800 hover:text-white transition-all text-slate-400">
                         <i class="fa-solid fa-sliders text-sm"></i> <span class="whitespace-nowrap">General Configurations</span>
                     </a>
-                    <a href="homepage.php" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold hover:bg-slate-800 hover:text-white transition-all <?php echo (basename($_SERVER['PHP_SELF']) === 'homepage.php') ? 'bg-brand-500/10 text-brand-400 border border-brand-500/20' : 'text-slate-400'; ?>">
+                    <a href="homepage.php" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold hover:bg-slate-800 hover:text-white transition-all text-slate-400">
                         <i class="fa-solid fa-rectangle-ad text-sm"></i> <span class="whitespace-nowrap">Hero Slider Manager</span>
                     </a>
-                    <a href="services_manager.php" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold hover:bg-slate-800 hover:text-white transition-all <?php echo (basename($_SERVER['PHP_SELF']) === 'services_manager.php') ? 'bg-brand-500/10 text-brand-400 border border-brand-500/20' : 'text-slate-400'; ?>">
+                    <a href="services_manager.php" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold hover:bg-slate-800 hover:text-white transition-all text-slate-400">
                         <i class="fa-solid fa-folder-open text-sm"></i> <span class="whitespace-nowrap">Services & Catalog</span>
                     </a>
-                    <a href="about_manager.php" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold hover:bg-slate-800 hover:text-white transition-all <?php echo (basename($_SERVER['PHP_SELF']) === 'about_manager.php') ? 'bg-brand-500/10 text-brand-400 border border-brand-500/20' : 'text-slate-400'; ?>">
+                    <a href="about_manager.php" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold hover:bg-slate-800 hover:text-white transition-all text-slate-400">
                         <i class="fa-solid fa-circle-info text-sm"></i> <span class="whitespace-nowrap">About Page Editor</span>
                     </a>
                     <a href="testimonials_manager.php" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold hover:bg-slate-800 hover:text-white transition-all <?php echo (basename($_SERVER['PHP_SELF']) === 'testimonials_manager.php') ? 'bg-brand-500/10 text-brand-400 border border-brand-500/20' : 'text-slate-400'; ?>">
@@ -185,86 +213,100 @@ if ($pdo !== null) {
         <!-- Main Workspace -->
         <div class="flex-grow flex flex-col min-w-0 bg-slate-50 overflow-hidden">
             
-            <!-- Header bar with Sidebar Toggle & Logout -->
+            <!-- Header bar -->
             <header class="bg-white border-b border-slate-200 h-16 flex items-center justify-between px-6 flex-shrink-0">
-                <!-- Toggle Button -->
                 <div class="flex items-center gap-4">
                     <button type="button" id="sidebar-toggle-btn" class="p-2.5 rounded-xl border border-slate-200 text-slate-650 hover:bg-slate-50 transition-colors flex items-center justify-center focus:outline-none">
                         <i class="fa-solid fa-bars-staggered text-sm"></i>
                     </button>
-                    <span class="text-sm font-black text-slate-900 hidden sm:inline-block uppercase tracking-wider">Compliance Command Center</span>
+                    <span class="text-sm font-black text-slate-900 hidden sm:inline-block uppercase tracking-wider">Customer Enquiries</span>
                 </div>
 
-                <!-- Admin Action items -->
                 <div class="flex items-center gap-4">
-                    <!-- CA Availability badge -->
                     <div class="hidden lg:flex items-center gap-2 px-3 py-1.5 bg-emerald-50 border border-emerald-500/10 rounded-full">
                         <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                         <span class="text-[10px] font-bold text-slate-700">CA Panel Live</span>
                     </div>
-                    
-                    <a href="logout.php" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-[10px] font-black text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors">
-                        <i class="fa-solid fa-right-from-bracket"></i> Logout
-                    </a>
                 </div>
             </header>
 
-            <!-- Scrollable Workspace Body -->
-            <main class="flex-1 overflow-y-auto p-6 sm:p-8 space-y-8">
+            <!-- Scrollable workspace content -->
+            <main class="flex-1 overflow-y-auto p-6 md:p-8 space-y-6">
                 
-                <!-- Welcome Title -->
-                <div class="text-left space-y-1">
-                    <h1 class="text-2xl font-black text-slate-900 tracking-tight">Welcome Back, <?php echo htmlspecialchars($adminUsername); ?>!</h1>
-                    <p class="text-xs text-slate-400 font-bold uppercase tracking-wider">Compliance Leads & Status Oversight</p>
+                <?php if ($message): ?>
+                <div class="p-4 border rounded-2xl flex items-center gap-3 text-xs font-bold <?php echo ($messageType === 'success') ? 'bg-emerald-550/10 bg-emerald-50 border-emerald-200 text-emerald-700' : 'bg-red-50 border-red-200 text-red-700'; ?>">
+                    <i class="<?php echo ($messageType === 'success') ? 'fa-solid fa-circle-check' : 'fa-solid fa-triangle-exclamation'; ?> text-base"></i>
+                    <span><?php echo htmlspecialchars($message); ?></span>
                 </div>
+                <?php endif; ?>
 
-                <!-- KPI Status Dashboard Grid -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                    
-                    <!-- KPI 1: Total Leads -->
-                    <div class="bg-white border border-slate-200 p-6 rounded-2xl flex items-center justify-between">
-                        <div class="space-y-1.5 text-left">
-                            <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest block">Total Enquiries</span>
-                            <span class="text-2xl font-black text-slate-900 block"><?php echo $totalLeads; ?></span>
-                        </div>
-                        <div class="w-10 h-10 rounded-xl bg-slate-100 text-slate-500 flex items-center justify-center text-sm">
-                            <i class="fa-solid fa-folder-open"></i>
+                <!-- Filters Panel -->
+                <div class="bg-white border border-slate-200 p-6 rounded-3xl text-left space-y-4">
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                        <h4 class="text-xs font-black uppercase text-slate-900 tracking-wider flex items-center gap-2">
+                            <i class="fa-solid fa-filter text-brand-500"></i> Lead Filter Desk
+                        </h4>
+                        <div class="flex gap-2">
+                            <a href="export_enquiries.php?status=<?php echo urlencode($filterStatus); ?>&service=<?php echo urlencode($filterService); ?>&search=<?php echo urlencode($filterSearch); ?>&start_date=<?php echo urlencode($filterStartDate); ?>&end_date=<?php echo urlencode($filterEndDate); ?>" 
+                               class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-[10px] font-black uppercase tracking-wider flex items-center gap-2 transition-colors">
+                                <i class="fa-solid fa-file-excel text-xs"></i> Export Filtered to Excel
+                            </a>
+                            <a href="enquiries.php" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-[10px] font-black uppercase tracking-wider flex items-center gap-2 transition-colors">
+                                <i class="fa-solid fa-arrow-rotate-right"></i> Reset Filters
+                            </a>
                         </div>
                     </div>
 
-                    <!-- KPI 2: Pending Reviews -->
-                    <div class="bg-white border border-slate-200 p-6 rounded-2xl flex items-center justify-between">
-                        <div class="space-y-1.5 text-left">
-                            <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest block">Pending Reviews</span>
-                            <span class="text-2xl font-black text-amber-600 block"><?php echo $pendingLeads; ?></span>
+                    <form method="GET" action="enquiries.php" class="grid grid-cols-1 sm:grid-cols-12 gap-4">
+                        <!-- Status Dropdown -->
+                        <div class="sm:col-span-2 space-y-1.5">
+                            <label class="text-[9px] font-extrabold uppercase tracking-widest text-slate-400">Status</label>
+                            <select name="status" onchange="this.form.submit()" class="w-full text-xs font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:border-brand-500 focus:outline-none transition-colors text-slate-755 font-sans">
+                                <option value="">All Statuses</option>
+                                <option value="Pending" <?php echo ($filterStatus === 'Pending') ? 'selected' : ''; ?>>Pending</option>
+                                <option value="In Progress" <?php echo ($filterStatus === 'In Progress') ? 'selected' : ''; ?>>In Progress</option>
+                                <option value="Resolved" <?php echo ($filterStatus === 'Resolved') ? 'selected' : ''; ?>>Resolved</option>
+                            </select>
                         </div>
-                        <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-500 flex items-center justify-center text-sm border border-amber-500/10">
-                            <i class="fa-solid fa-clock-rotate-left"></i>
-                        </div>
-                    </div>
 
-                    <!-- KPI 3: In Progress Desk -->
-                    <div class="bg-white border border-slate-200 p-6 rounded-2xl flex items-center justify-between">
-                        <div class="space-y-1.5 text-left">
-                            <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest block">In Progress Desk</span>
-                            <span class="text-2xl font-black text-blue-600 block"><?php echo $inProgressLeads; ?></span>
+                        <!-- Service Category Dropdown -->
+                        <div class="sm:col-span-4 space-y-1.5">
+                            <label class="text-[9px] font-extrabold uppercase tracking-widest text-slate-400">Required Service</label>
+                            <select name="service" onchange="this.form.submit()" class="w-full text-xs font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:border-brand-500 focus:outline-none transition-colors text-slate-755 font-sans">
+                                <option value="">All Service Origins</option>
+                                <?php foreach ($distinctServices as $ds): ?>
+                                    <option value="<?php echo htmlspecialchars($ds); ?>" <?php echo ($filterService === $ds) ? 'selected' : ''; ?>>
+                                        <?php echo htmlspecialchars($ds); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
                         </div>
-                        <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-500 flex items-center justify-center text-sm border border-blue-500/10">
-                            <i class="fa-solid fa-spinner"></i>
-                        </div>
-                    </div>
 
-                    <!-- KPI 4: Resolved Milestones -->
-                    <div class="bg-white border border-slate-200 p-6 rounded-2xl flex items-center justify-between">
-                        <div class="space-y-1.5 text-left">
-                            <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest block">Resolved Files</span>
-                            <span class="text-2xl font-black text-emerald-600 block"><?php echo $resolvedLeads; ?></span>
+                        <!-- Start Date -->
+                        <div class="sm:col-span-2 space-y-1.5">
+                            <label class="text-[9px] font-extrabold uppercase tracking-widest text-slate-400">Start Date</label>
+                            <input type="date" name="start_date" value="<?php echo htmlspecialchars($filterStartDate); ?>" class="w-full text-xs font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:border-brand-500 focus:outline-none transition-colors text-slate-700 font-sans">
                         </div>
-                        <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-500 flex items-center justify-center text-sm border border-emerald-500/10">
-                            <i class="fa-solid fa-circle-check"></i>
-                        </div>
-                    </div>
 
+                        <!-- End Date -->
+                        <div class="sm:col-span-2 space-y-1.5">
+                            <label class="text-[9px] font-extrabold uppercase tracking-widest text-slate-400">End Date</label>
+                            <input type="date" name="end_date" value="<?php echo htmlspecialchars($filterEndDate); ?>" class="w-full text-xs font-semibold px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:border-brand-500 focus:outline-none transition-colors text-slate-700 font-sans">
+                        </div>
+
+                        <!-- Search Button -->
+                        <div class="sm:col-span-2 space-y-1.5 flex items-end">
+                            <button type="submit" class="w-full text-center py-2 bg-brand-500 hover:bg-brand-600 text-white rounded-xl text-[10px] font-black uppercase tracking-wider transition-colors flex items-center justify-center gap-1.5 h-[38px]">
+                                <i class="fa-solid fa-magnifying-glass text-xs"></i> Apply Filters
+                            </button>
+                        </div>
+
+                        <!-- Text Search Field -->
+                        <div class="sm:col-span-12 space-y-1.5 mt-2">
+                            <label class="text-[9px] font-extrabold uppercase tracking-widest text-slate-450">Keyword Search</label>
+                            <input type="text" name="search" value="<?php echo htmlspecialchars($filterSearch); ?>" placeholder="Search name, email, phone, messages..." class="w-full text-xs font-semibold px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:border-brand-500 focus:outline-none transition-colors text-slate-700 font-sans">
+                        </div>
+                    </form>
                 </div>
 
                 <!-- Leads Datatable Card -->
@@ -272,8 +314,8 @@ if ($pdo !== null) {
                     <!-- Card Header -->
                     <div class="px-6 py-5 border-b border-slate-200 flex flex-wrap items-center justify-between gap-4">
                         <div class="text-left space-y-1">
-                            <h3 class="text-base font-extrabold text-slate-900">Recent Enquiry Registries</h3>
-                            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Latest 5 submissions captured from the website contact forms</p>
+                            <h3 class="text-base font-extrabold text-slate-900">All Enquiry Registries</h3>
+                            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">All submissions captured from the website contact forms</p>
                         </div>
                         
                         <!-- Search filtering -->
@@ -281,7 +323,7 @@ if ($pdo !== null) {
                             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                 <i class="fa-solid fa-magnifying-glass text-slate-450 text-[10px]"></i>
                             </div>
-                            <input type="text" id="leads-search-box" placeholder="Filter by name, email..." 
+                            <input type="text" id="leads-search-box" placeholder="Search by name, email, service..." 
                                    class="w-full text-xs font-semibold pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:border-brand-500 focus:outline-none transition-colors">
                         </div>
                     </div>
@@ -326,7 +368,7 @@ if ($pdo !== null) {
 
                                             <!-- Message details -->
                                             <td class="px-6 py-4 max-w-xs sm:max-w-sm">
-                                                <div class="space-y-1">
+                                                <div class="space-y-1 text-left">
                                                     <span class="text-[10px] text-slate-400 font-bold block">Size: <?php echo htmlspecialchars($lead['org_size']); ?> employee(s)</span>
                                                     <p class="text-[11px] text-slate-550 leading-relaxed truncate-2-lines italic">
                                                         "<?php echo htmlspecialchars($lead['message'] ?: 'No details specified.'); ?>"
@@ -356,7 +398,7 @@ if ($pdo !== null) {
                                             <td class="px-6 py-4">
                                                 <div class="flex items-center justify-center gap-3">
                                                     <!-- Status Update Form -->
-                                                    <form action="admin.php" method="POST" class="flex items-center">
+                                                    <form action="" method="POST" class="flex items-center">
                                                         <input type="hidden" name="action" value="update_status">
                                                         <input type="hidden" name="id" value="<?php echo $lead['id']; ?>">
                                                         <select name="status" onchange="this.form.submit()" 
@@ -368,12 +410,12 @@ if ($pdo !== null) {
                                                         </select>
                                                     </form>
 
-                                                    <!-- Delete button form -->
-                                                    <form action="admin.php" method="POST" onsubmit="return confirm('Are you sure you want to permanently delete this lead enquiry?');">
+                                                    <!-- Delete Button Form -->
+                                                    <form action="" method="POST" onsubmit="return confirm('Are you sure you want to delete this enquiry lead?')" class="flex items-center">
                                                         <input type="hidden" name="action" value="delete">
                                                         <input type="hidden" name="id" value="<?php echo $lead['id']; ?>">
-                                                        <button type="submit" class="p-1.5 rounded-md border border-red-200 text-red-500 hover:bg-red-50 transition-colors flex items-center justify-center" aria-label="Delete Lead">
-                                                            <i class="fa-solid fa-trash text-xs"></i>
+                                                        <button type="submit" class="w-8 h-8 rounded-lg bg-red-50 hover:bg-red-500 text-red-500 hover:text-white flex items-center justify-center border border-red-200/40 transition-all text-xs" title="Delete Lead">
+                                                            <i class="fa-solid fa-trash-can"></i>
                                                         </button>
                                                     </form>
                                                 </div>
@@ -384,52 +426,46 @@ if ($pdo !== null) {
                             </tbody>
                         </table>
                     </div>
-                    <!-- Card Footer Link -->
-                    <div class="px-6 py-4 bg-slate-50 border-t border-slate-200 text-center">
-                        <a href="enquiries.php" class="inline-flex items-center gap-1.5 text-xs font-black text-brand-650 hover:text-brand-700 uppercase tracking-widest transition-all">
-                            View All Customer Enquiries <i class="fa-solid fa-arrow-right-long text-[10px]"></i>
-                        </a>
-                    </div>
                 </div>
 
             </main>
-
         </div>
-
     </div>
 
-    <!-- Sidebar Collapsing and search scripts -->
+    <!-- Script Helpers -->
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const sidebar = document.getElementById('admin-sidebar');
-            const toggleBtn = document.getElementById('sidebar-toggle-btn');
-            const searchBox = document.getElementById('leads-search-box');
-            const tableRows = document.querySelectorAll('.lead-row');
-
-            // 1. Sidebar Toggle collapse function
+        // Sidebar Toggle logic
+        const toggleBtn = document.getElementById('sidebar-toggle-btn');
+        const sidebar = document.getElementById('admin-sidebar');
+        if (toggleBtn && sidebar) {
             toggleBtn.addEventListener('click', () => {
                 sidebar.classList.toggle('w-64');
                 sidebar.classList.toggle('w-0');
+                sidebar.classList.toggle('p-6');
+                sidebar.classList.toggle('p-0');
             });
+        }
 
-            // 2. Client Side lead Search filtering
+        // Live filtering search box
+        const searchBox = document.getElementById('leads-search-box');
+        if (searchBox) {
             searchBox.addEventListener('input', () => {
-                const query = searchBox.value.toLowerCase().trim();
+                const query = searchBox.value.trim().toLowerCase();
+                const rows = document.querySelectorAll('.lead-row');
                 
-                tableRows.forEach(row => {
+                rows.forEach(row => {
                     const name = row.querySelector('.lead-name').textContent.toLowerCase();
                     const email = row.querySelector('.lead-email').textContent.toLowerCase();
+                    const service = row.querySelector('span.uppercase').textContent.toLowerCase();
                     
-                    if (name.includes(query) || email.includes(query)) {
+                    if (name.includes(query) || email.includes(query) || service.includes(query)) {
                         row.classList.remove('hidden');
                     } else {
                         row.classList.add('hidden');
                     }
                 });
             });
-        });
+        }
     </script>
-
 </body>
-
 </html>

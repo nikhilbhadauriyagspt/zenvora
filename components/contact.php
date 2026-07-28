@@ -123,6 +123,7 @@
                     <!-- Hidden fields to support database fields from home component -->
                     <input type="hidden" name="org_size" value="1">
                     <input type="hidden" name="timeline" value="immediately">
+                    <input type="hidden" name="source_page" value="Homepage">
 
                     <!-- Message details -->
                     <div class="space-y-1.5">

@@ -1,17 +1,32 @@
 <?php
 // Standalone Blog Detail Page for Zenvora Global Solutions
-require_once 'components/blog_data.php';
+require_once 'components/db_connect.php';
+require_once 'components/settings_helper.php';
 
 // Validate and fetch the request blog ID
 $blogId = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 
-if (!isset($blogs[$blogId])) {
+$blog = null;
+$blogs = [];
+if ($pdo !== null) {
+    try {
+        if ($blogId > 0) {
+            $stmt = $pdo->prepare("SELECT * FROM blogs WHERE id = :id AND status = 'Published'");
+            $stmt->execute([':id' => $blogId]);
+            $blog = $stmt->fetch(PDO::FETCH_ASSOC);
+        }
+        $stmtAll = $pdo->query("SELECT * FROM blogs WHERE status = 'Published' ORDER BY id DESC LIMIT 5");
+        $blogs = $stmtAll->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        // Fallback
+    }
+}
+
+if (!$blog) {
     // If invalid ID, redirect back to blogs catalog page
     header('Location: blog.php');
     exit;
 }
-
-$blog = $blogs[$blogId];
 ?>
 <!DOCTYPE html>
 <html lang="en" class="scroll-smooth">

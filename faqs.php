@@ -1,5 +1,114 @@
 <?php
 // Standalone FAQs Directory Page for Zenvora Global Solutions
+require_once 'components/db_connect.php';
+require_once 'components/settings_helper.php';
+
+// 1. Fetch Categories from database
+$categories = [];
+if ($pdo !== null) {
+    try {
+        $stmtCats = $pdo->query("SELECT * FROM service_categories ORDER BY sort_order ASC");
+        $categories = $stmtCats->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        $categories = [];
+    }
+}
+
+// Fallback categories if empty or DB offline
+if (empty($categories)) {
+    $categories = [
+        ['name' => 'Business Startup', 'slug' => 'business-startup'],
+        ['name' => 'Registrations', 'slug' => 'registrations'],
+        ['name' => 'Licenses', 'slug' => 'licenses'],
+        ['name' => 'Certifications', 'slug' => 'certifications'],
+        ['name' => 'Tax & Compliance', 'slug' => 'tax-compliance'],
+        ['name' => 'NGO Registration', 'slug' => 'ngo-registration']
+    ];
+}
+
+// 2. Fetch all FAQs dynamically from services table JSON arrays
+$allFaqs = [];
+if ($pdo !== null) {
+    try {
+        $stmtFaqs = $pdo->query("SELECT s.faqs_json, s.title as service_title, c.slug as category_slug, c.name as category_name 
+                                 FROM services s 
+                                 JOIN service_categories c ON s.category_id = c.id");
+        $services = $stmtFaqs->fetchAll(PDO::FETCH_ASSOC);
+        foreach ($services as $service) {
+            $faqs_arr = json_decode($service['faqs_json'], true);
+            if (is_array($faqs_arr)) {
+                foreach ($faqs_arr as $faq) {
+                    if (!empty($faq['q']) && !empty($faq['a'])) {
+                        $allFaqs[] = [
+                            'question' => $faq['q'],
+                            'answer' => $faq['a'],
+                            'service_title' => $service['service_title'],
+                            'category_slug' => $service['category_slug'],
+                            'category_name' => $service['category_name']
+                        ];
+                    }
+                }
+            }
+        }
+    } catch (PDOException $e) {
+        $allFaqs = [];
+    }
+}
+
+// Fallback FAQs if database has no active FAQ records
+if (empty($allFaqs)) {
+    $allFaqs = [
+        [
+            'question' => 'How long does the Private Limited registration process take?',
+            'answer' => 'The complete registration cycle usually takes 5 to 7 business days. This timeframe is dependent on government verification cycles and includes name approval, MoA/AoA submission, and certificate of incorporation issuance by the MCA.',
+            'service_title' => 'Pvt Ltd Registration',
+            'category_slug' => 'business-startup',
+            'category_name' => 'Business Startup'
+        ],
+        [
+            'question' => 'What is the minimum capital required to register a Private Limited company?',
+            'answer' => 'There is no minimum authorized capital requirement mandated by the Ministry of Corporate Affairs (MCA) to start a Private Limited company in India. You can begin incorporation with an authorized share capital of even ₹10,000.',
+            'service_title' => 'Pvt Ltd Registration',
+            'category_slug' => 'business-startup',
+            'category_name' => 'Business Startup'
+        ],
+        [
+            'question' => 'When is GST registration mandatory for a business?',
+            'answer' => 'GST registration is mandatory if your annual aggregate turnover exceeds ₹40 Lakhs for goods suppliers (₹20 Lakhs for North-Eastern states) or ₹20 Lakhs for service providers. Regardless of turnover, it is mandatory if you engage in e-commerce, inter-state trade, or sell via digital aggregators.',
+            'service_title' => 'GST Registration',
+            'category_slug' => 'registrations',
+            'category_name' => 'Registrations'
+        ],
+        [
+            'question' => 'What is the difference between GST registration and MSME registration?',
+            'answer' => 'GST is a tax registration mandatory for businesses meeting aggregate turnover thresholds or trading inter-state. MSME (Udyam) registration is an optional government certification that classifies your enterprise and unlocks subsidies, priority sector loans, and delayed payment protections.',
+            'service_title' => 'MSME Registration',
+            'category_slug' => 'registrations',
+            'category_name' => 'Registrations'
+        ],
+        [
+            'question' => 'Who needs an FSSAI Food License, and what are its types?',
+            'answer' => 'Any food business operator (FBO) involved in manufacturing, processing, packaging, distributing, or selling food items needs FSSAI registration. It is graded into three types: Basic registration (turnover under ₹12 Lakhs), State License (turnover between ₹12 Lakhs and ₹20 Crores), and Central License (turnover above ₹20 Crores).',
+            'service_title' => 'FSSAI License',
+            'category_slug' => 'licenses',
+            'category_name' => 'Licenses'
+        ],
+        [
+            'question' => 'Can I use the \'TM\' symbol immediately after filing a trademark?',
+            'answer' => 'Yes. Once your trademark application is successfully filed with the IPR Registry and an application number is generated, you can legally start using the "TM" symbol beside your logo or brand name. You can only use the registered "®" symbol after the trademark certificate is issued.',
+            'service_title' => 'Trademark Registration',
+            'category_slug' => 'licenses',
+            'category_name' => 'Licenses'
+        ],
+        [
+            'question' => 'What is a Section 8 Company, and how does it differ from a Trust?',
+            'answer' => 'A Section 8 Company is registered under the Central Companies Act with the MCA, offering high transparency, a corporate structure, and limited liability (perfect for CSR funding). A Trust is created under state trust deeds and registered with local Sub-Registrars under provincial laws, typically involving simpler compliance.',
+            'service_title' => 'Section 8 Company',
+            'category_slug' => 'ngo-registration',
+            'category_name' => 'NGO Registration'
+        ]
+    ];
+}
 ?>
 <!DOCTYPE html>
 <html lang="en" class="scroll-smooth">
@@ -64,22 +173,13 @@
                                 <span>All Categories</span>
                                 <i class="fa-solid fa-chevron-right text-[9px]"></i>
                             </button>
-                            <button class="faq-filter-btn w-full text-left text-xs font-black uppercase tracking-wider py-2.5 px-3.5 rounded-lg transition-all flex items-center justify-between text-slate-600 hover:bg-slate-100 border border-transparent" data-category="startup">
-                                <span>Business Startup</span>
+                            
+                            <?php foreach ($categories as $cat): ?>
+                            <button class="faq-filter-btn w-full text-left text-xs font-black uppercase tracking-wider py-2.5 px-3.5 rounded-lg transition-all flex items-center justify-between text-slate-600 hover:bg-slate-100 border border-transparent" data-category="<?php echo htmlspecialchars($cat['slug']); ?>">
+                                <span><?php echo htmlspecialchars($cat['name']); ?></span>
                                 <i class="fa-solid fa-chevron-right text-[9px]"></i>
                             </button>
-                            <button class="faq-filter-btn w-full text-left text-xs font-black uppercase tracking-wider py-2.5 px-3.5 rounded-lg transition-all flex items-center justify-between text-slate-600 hover:bg-slate-100 border border-transparent" data-category="tax">
-                                <span>Tax & GST</span>
-                                <i class="fa-solid fa-chevron-right text-[9px]"></i>
-                            </button>
-                            <button class="faq-filter-btn w-full text-left text-xs font-black uppercase tracking-wider py-2.5 px-3.5 rounded-lg transition-all flex items-center justify-between text-slate-600 hover:bg-slate-100 border border-transparent" data-category="licenses">
-                                <span>Licenses & IPR</span>
-                                <i class="fa-solid fa-chevron-right text-[9px]"></i>
-                            </button>
-                            <button class="faq-filter-btn w-full text-left text-xs font-black uppercase tracking-wider py-2.5 px-3.5 rounded-lg transition-all flex items-center justify-between text-slate-600 hover:bg-slate-100 border border-transparent" data-category="ngo">
-                                <span>NGO & Trust</span>
-                                <i class="fa-solid fa-chevron-right text-[9px]"></i>
-                            </button>
+                            <?php endforeach; ?>
                         </div>
 
                         <!-- Support Representative Info Card -->
@@ -99,185 +199,27 @@
                     <!-- Right Column: Accordions (col-span-8) -->
                     <div class="lg:col-span-8 space-y-4" id="faq-accordions-container">
                         
-                        <!-- FAQ 1 (Startup) -->
-                        <div class="faq-page-item border border-slate-200/60 bg-white rounded-2xl p-5 transition-all duration-300 cursor-pointer" data-category="startup">
+                        <?php foreach ($allFaqs as $faqItem): ?>
+                        <!-- FAQ Item -->
+                        <div class="faq-page-item border border-slate-200/60 bg-white rounded-2xl p-5 transition-all duration-300 cursor-pointer" data-category="<?php echo htmlspecialchars($faqItem['category_slug']); ?>">
                             <div class="flex items-center justify-between gap-4">
-                                <h3 class="text-sm font-extrabold text-slate-900">How long does the Private Limited registration process take?</h3>
+                                <div class="space-y-1 text-left">
+                                    <span class="text-[9px] font-black text-brand-600 uppercase tracking-widest block">
+                                        <?php echo htmlspecialchars($faqItem['service_title']); ?> &bull; <?php echo htmlspecialchars($faqItem['category_name']); ?>
+                                    </span>
+                                    <h3 class="text-sm font-extrabold text-slate-900"><?php echo htmlspecialchars($faqItem['question']); ?></h3>
+                                </div>
                                 <div class="faq-page-icon w-6 h-6 rounded-full bg-slate-50 text-slate-400 flex items-center justify-center text-xs flex-shrink-0 transition-colors">
                                     <i class="fa-solid fa-plus transition-transform duration-300"></i>
                                 </div>
                             </div>
                             <div class="faq-page-content overflow-hidden transition-all duration-350 max-h-0 text-xs text-slate-500 leading-relaxed mt-0">
-                                <p class="pt-3 border-t border-slate-100/60 mt-3">
-                                    The complete registration cycle usually takes 5 to 7 business days. This timeframe is dependent on government verification cycles and includes name approval, MoA/AoA submission, and certificate of incorporation issuance by the MCA.
+                                <p class="pt-3 border-t border-slate-100/60 mt-3 text-left">
+                                    <?php echo nl2br(htmlspecialchars($faqItem['answer'])); ?>
                                 </p>
                             </div>
                         </div>
-
-                        <!-- FAQ 2 (Startup) -->
-                        <div class="faq-page-item border border-slate-200/60 bg-white rounded-2xl p-5 transition-all duration-300 cursor-pointer" data-category="startup">
-                            <div class="flex items-center justify-between gap-4">
-                                <h3 class="text-sm font-extrabold text-slate-900">What is the minimum capital required to register a Private Limited company?</h3>
-                                <div class="faq-page-icon w-6 h-6 rounded-full bg-slate-50 text-slate-400 flex items-center justify-center text-xs flex-shrink-0 transition-colors">
-                                    <i class="fa-solid fa-plus transition-transform duration-300"></i>
-                                </div>
-                            </div>
-                            <div class="faq-page-content overflow-hidden transition-all duration-350 max-h-0 text-xs text-slate-500 leading-relaxed mt-0">
-                                <p class="pt-3 border-t border-slate-100/60 mt-3">
-                                    There is no minimum authorized capital requirement mandated by the Ministry of Corporate Affairs (MCA) to start a Private Limited company in India. You can begin incorporation with an authorized share capital of even ₹10,000.
-                                </p>
-                            </div>
-                        </div>
-
-                        <!-- FAQ 3 (Startup) -->
-                        <div class="faq-page-item border border-slate-200/60 bg-white rounded-2xl p-5 transition-all duration-300 cursor-pointer" data-category="startup">
-                            <div class="flex items-center justify-between gap-4">
-                                <h3 class="text-sm font-extrabold text-slate-900">Can a single person register a corporate entity in India?</h3>
-                                <div class="faq-page-icon w-6 h-6 rounded-full bg-slate-50 text-slate-400 flex items-center justify-center text-xs flex-shrink-0 transition-colors">
-                                    <i class="fa-solid fa-plus transition-transform duration-300"></i>
-                                </div>
-                            </div>
-                            <div class="faq-page-content overflow-hidden transition-all duration-350 max-h-0 text-xs text-slate-500 leading-relaxed mt-0">
-                                <p class="pt-3 border-t border-slate-100/60 mt-3">
-                                    Yes. Under the Companies Act, a single founder can register a One Person Company (OPC), which provides corporate status and limited liability. Alternatively, you can start a Sole Proprietorship if you do not want incorporation status.
-                                </p>
-                            </div>
-                        </div>
-
-                        <!-- FAQ 4 (Tax) -->
-                        <div class="faq-page-item border border-slate-200/60 bg-white rounded-2xl p-5 transition-all duration-300 cursor-pointer" data-category="tax">
-                            <div class="flex items-center justify-between gap-4">
-                                <h3 class="text-sm font-extrabold text-slate-900">When is GST registration mandatory for a business?</h3>
-                                <div class="faq-page-icon w-6 h-6 rounded-full bg-slate-50 text-slate-400 flex items-center justify-center text-xs flex-shrink-0 transition-colors">
-                                    <i class="fa-solid fa-plus transition-transform duration-300"></i>
-                                </div>
-                            </div>
-                            <div class="faq-page-content overflow-hidden transition-all duration-350 max-h-0 text-xs text-slate-500 leading-relaxed mt-0">
-                                <p class="pt-3 border-t border-slate-100/60 mt-3">
-                                    GST registration is mandatory if your annual aggregate turnover exceeds ₹40 Lakhs for goods suppliers (₹20 Lakhs for North-Eastern states) or ₹20 Lakhs for service providers. Regardless of turnover, it is mandatory if you engage in e-commerce, inter-state trade, or sell via digital aggregators.
-                                </p>
-                            </div>
-                        </div>
-
-                        <!-- FAQ 5 (Tax) -->
-                        <div class="faq-page-item border border-slate-200/60 bg-white rounded-2xl p-5 transition-all duration-300 cursor-pointer" data-category="tax">
-                            <div class="flex items-center justify-between gap-4">
-                                <h3 class="text-sm font-extrabold text-slate-900">What is the penalty for late filing of monthly GST returns?</h3>
-                                <div class="faq-page-icon w-6 h-6 rounded-full bg-slate-50 text-slate-400 flex items-center justify-center text-xs flex-shrink-0 transition-colors">
-                                    <i class="fa-solid fa-plus transition-transform duration-300"></i>
-                                </div>
-                            </div>
-                            <div class="faq-page-content overflow-hidden transition-all duration-350 max-h-0 text-xs text-slate-500 leading-relaxed mt-0">
-                                <p class="pt-3 border-t border-slate-100/60 mt-3">
-                                    The government charges a late fee of ₹50 per day (₹20 per day for Nil returns) for late filings of GSTR-3B and GSTR-1. In addition, an interest of 18% per annum is applicable on the outstanding tax liability amount if paid after the due date.
-                                </p>
-                            </div>
-                        </div>
-
-                        <!-- FAQ 6 (Tax) -->
-                        <div class="faq-page-item border border-slate-200/60 bg-white rounded-2xl p-5 transition-all duration-300 cursor-pointer" data-category="tax">
-                            <div class="flex items-center justify-between gap-4">
-                                <h3 class="text-sm font-extrabold text-slate-900">How often do I need to file corporate Income Tax Returns (ITR)?</h3>
-                                <div class="faq-page-icon w-6 h-6 rounded-full bg-slate-50 text-slate-400 flex items-center justify-center text-xs flex-shrink-0 transition-colors">
-                                    <i class="fa-solid fa-plus transition-transform duration-300"></i>
-                                </div>
-                            </div>
-                            <div class="faq-page-content overflow-hidden transition-all duration-350 max-h-0 text-xs text-slate-500 leading-relaxed mt-0">
-                                <p class="pt-3 border-t border-slate-100/60 mt-3">
-                                    All registered companies (Pvt Ltd, OPC, Section 8) must file their Income Tax Return (ITR-6) annually, even if there was zero commercial transaction during the fiscal year. The due date is usually October 31st for audited corporations.
-                                </p>
-                            </div>
-                        </div>
-
-                        <!-- FAQ 7 (Licenses) -->
-                        <div class="faq-page-item border border-slate-200/60 bg-white rounded-2xl p-5 transition-all duration-300 cursor-pointer" data-category="licenses">
-                            <div class="flex items-center justify-between gap-4">
-                                <h3 class="text-sm font-extrabold text-slate-900">Who needs an FSSAI Food License, and what are its types?</h3>
-                                <div class="faq-page-icon w-6 h-6 rounded-full bg-slate-50 text-slate-400 flex items-center justify-center text-xs flex-shrink-0 transition-colors">
-                                    <i class="fa-solid fa-plus transition-transform duration-300"></i>
-                                </div>
-                            </div>
-                            <div class="faq-page-content overflow-hidden transition-all duration-350 max-h-0 text-xs text-slate-500 leading-relaxed mt-0">
-                                <p class="pt-3 border-t border-slate-100/60 mt-3">
-                                    Any food business operator (FBO) involved in manufacturing, processing, packaging, distributing, or selling food items needs FSSAI registration. It is graded into three types: Basic registration (turnover under ₹12 Lakhs), State License (turnover between ₹12 Lakhs and ₹20 Crores), and Central License (turnover above ₹20 Crores).
-                                </p>
-                            </div>
-                        </div>
-
-                        <!-- FAQ 8 (Licenses) -->
-                        <div class="faq-page-item border border-slate-200/60 bg-white rounded-2xl p-5 transition-all duration-300 cursor-pointer" data-category="licenses">
-                            <div class="flex items-center justify-between gap-4">
-                                <h3 class="text-sm font-extrabold text-slate-900">Can I use the 'TM' symbol immediately after filing a trademark?</h3>
-                                <div class="faq-page-icon w-6 h-6 rounded-full bg-slate-50 text-slate-400 flex items-center justify-center text-xs flex-shrink-0 transition-colors">
-                                    <i class="fa-solid fa-plus transition-transform duration-300"></i>
-                                </div>
-                            </div>
-                            <div class="faq-page-content overflow-hidden transition-all duration-350 max-h-0 text-xs text-slate-500 leading-relaxed mt-0">
-                                <p class="pt-3 border-t border-slate-100/60 mt-3">
-                                    Yes. Once your trademark application is successfully filed with the IPR Registry and an application number is generated, you can legally start using the "TM" symbol beside your logo or brand name. You can only use the registered "®" symbol after the trademark certificate is issued.
-                                </p>
-                            </div>
-                        </div>
-
-                        <!-- FAQ 9 (Licenses) -->
-                        <div class="faq-page-item border border-slate-200/60 bg-white rounded-2xl p-5 transition-all duration-300 cursor-pointer" data-category="licenses">
-                            <div class="flex items-center justify-between gap-4">
-                                <h3 class="text-sm font-extrabold text-slate-900">What is an ISO Certification, and how does it benefit my startup?</h3>
-                                <div class="faq-page-icon w-6 h-6 rounded-full bg-slate-50 text-slate-400 flex items-center justify-center text-xs flex-shrink-0 transition-colors">
-                                    <i class="fa-solid fa-plus transition-transform duration-300"></i>
-                                </div>
-                            </div>
-                            <div class="faq-page-content overflow-hidden transition-all duration-350 max-h-0 text-xs text-slate-500 leading-relaxed mt-0">
-                                <p class="pt-3 border-t border-slate-100/60 mt-3">
-                                    ISO certification (like ISO 9001:2015 for Quality Management Systems) certifies that your company operates under standardized operational controls. It improves vendor onboarding rates, makes your company eligible to bid for government tenders, and enhances global client trust.
-                                </p>
-                            </div>
-                        </div>
-
-                        <!-- FAQ 10 (NGO) -->
-                        <div class="faq-page-item border border-slate-200/60 bg-white rounded-2xl p-5 transition-all duration-300 cursor-pointer" data-category="ngo">
-                            <div class="flex items-center justify-between gap-4">
-                                <h3 class="text-sm font-extrabold text-slate-900">What is a Section 8 Company, and how does it differ from a Trust?</h3>
-                                <div class="faq-page-icon w-6 h-6 rounded-full bg-slate-50 text-slate-400 flex items-center justify-center text-xs flex-shrink-0 transition-colors">
-                                    <i class="fa-solid fa-plus transition-transform duration-300"></i>
-                                </div>
-                            </div>
-                            <div class="faq-page-content overflow-hidden transition-all duration-350 max-h-0 text-xs text-slate-500 leading-relaxed mt-0">
-                                <p class="pt-3 border-t border-slate-100/60 mt-3">
-                                    A Section 8 Company is registered under the Central Companies Act with the MCA, offering high transparency, a corporate structure, and limited liability (perfect for CSR funding). A Trust is created under state trust deeds and registered with local Sub-Registrars under provincial laws, typically involving simpler compliance.
-                                </p>
-                            </div>
-                        </div>
-
-                        <!-- FAQ 11 (NGO) -->
-                        <div class="faq-page-item border border-slate-200/60 bg-white rounded-2xl p-5 transition-all duration-300 cursor-pointer" data-category="ngo">
-                            <div class="flex items-center justify-between gap-4">
-                                <h3 class="text-sm font-extrabold text-slate-900">What are 12A and 80G registrations, and why does my NGO need them?</h3>
-                                <div class="faq-page-icon w-6 h-6 rounded-full bg-slate-50 text-slate-400 flex items-center justify-center text-xs flex-shrink-0 transition-colors">
-                                    <i class="fa-solid fa-plus transition-transform duration-300"></i>
-                                </div>
-                            </div>
-                            <div class="faq-page-content overflow-hidden transition-all duration-350 max-h-0 text-xs text-slate-500 leading-relaxed mt-0">
-                                <p class="pt-3 border-t border-slate-100/60 mt-3">
-                                    12A registration exempts the NGO's surplus income from annual taxation under the Income Tax Act. 80G registration allows donors (individuals/corporates) to claim up to a 50% tax deduction on their donations, making it highly attractive for securing sponsorships and donations.
-                                </p>
-                            </div>
-                        </div>
-
-                        <!-- FAQ 12 (NGO) -->
-                        <div class="faq-page-item border border-slate-200/60 bg-white rounded-2xl p-5 transition-all duration-300 cursor-pointer" data-category="ngo">
-                            <div class="flex items-center justify-between gap-4">
-                                <h3 class="text-sm font-extrabold text-slate-900">What is NITI Aayog Darpan registration?</h3>
-                                <div class="faq-page-icon w-6 h-6 rounded-full bg-slate-50 text-slate-400 flex items-center justify-center text-xs flex-shrink-0 transition-colors">
-                                    <i class="fa-solid fa-plus transition-transform duration-300"></i>
-                                </div>
-                            </div>
-                            <div class="faq-page-content overflow-hidden transition-all duration-350 max-h-0 text-xs text-slate-500 leading-relaxed mt-0">
-                                <p class="pt-3 border-t border-slate-100/60 mt-3">
-                                    NGO Darpan is a portal operated by NITI Aayog that assigns a unique ID tracking system to NGOs. Registration is mandatory to apply for any central government grants, CSR funding from public sector undertakings, or central welfare schemes.
-                                </p>
-                            </div>
-                        </div>
+                        <?php endforeach; ?>
 
                     </div>
                 </div>

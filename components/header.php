@@ -1,9 +1,93 @@
+<?php
+// Dynamic Navigation Megamenu
+$nav_categories = [];
+$search_services = [];
+if (isset($pdo) && $pdo !== null) {
+    try {
+        $nav_categories = $pdo->query("SELECT * FROM service_categories ORDER BY sort_order ASC, id ASC")->fetchAll(PDO::FETCH_ASSOC);
+        $search_services = $pdo->query("SELECT title, slug, tagline FROM services ORDER BY title ASC")->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        $nav_categories = [];
+        $search_services = [];
+    }
+}
+
+if (empty($nav_categories)) {
+    // Dynamic Fallback Megamenu configuration
+    $nav_categories = [
+        [
+            'name' => 'Business Setup',
+            'slug' => 'business-startup',
+            'icon' => 'fa-solid fa-rocket',
+            'services' => [
+                ['title' => 'Private Limited Company', 'slug' => 'private-limited-company', 'icon' => 'fa-solid fa-building'],
+                ['title' => 'Limited Liability Partnership (LLP)', 'slug' => 'limited-liability-partnership', 'icon' => 'fa-solid fa-people-carry-box'],
+                ['title' => 'One Person Company (OPC)', 'slug' => 'one-person-company', 'icon' => 'fa-solid fa-user-tie'],
+                ['title' => 'Partnership Firm Setup', 'slug' => 'partnership-firm', 'icon' => 'fa-solid fa-user-group'],
+                ['title' => 'Proprietorship Registration', 'slug' => 'proprietorship-registration', 'icon' => 'fa-solid fa-user']
+            ]
+        ],
+        [
+            'name' => 'Registrations',
+            'slug' => 'registrations',
+            'icon' => 'fa-solid fa-receipt',
+            'services' => [
+                ['title' => 'GST Registration', 'slug' => 'gst-registration', 'icon' => 'fa-solid fa-receipt'],
+                ['title' => 'MSME (Udyam) Registration', 'slug' => 'msme-udyam', 'icon' => 'fa-solid fa-briefcase'],
+                ['title' => 'Startup India DPIIT Recognition', 'slug' => 'startup-india', 'icon' => 'fa-solid fa-flag'],
+                ['title' => 'Import Export Code (IEC)', 'slug' => 'import-export-code', 'icon' => 'fa-solid fa-globe'],
+                ['title' => 'PF & ESI Registration', 'slug' => 'pf-esi-registration', 'icon' => 'fa-solid fa-users']
+            ]
+        ],
+        [
+            'name' => 'Licenses & IPR',
+            'slug' => 'licenses',
+            'icon' => 'fa-solid fa-scale-balanced',
+            'services' => [
+                ['title' => 'FSSAI Food License', 'slug' => 'fssai-food-license', 'icon' => 'fa-solid fa-utensils'],
+                ['title' => 'Trade License (Municipal)', 'slug' => 'trade-license', 'icon' => 'fa-solid fa-scale-balanced'],
+                ['title' => 'Shop & Establishment (Shop Act)', 'slug' => 'shop-establishment', 'icon' => 'fa-solid fa-store'],
+                ['title' => 'Trademark (TM) Registration', 'slug' => 'trademark-registration', 'icon' => 'fa-solid fa-copyright']
+            ]
+        ],
+        [
+            'name' => 'NGO & Taxation',
+            'slug' => 'tax-compliance',
+            'icon' => 'fa-solid fa-calculator',
+            'services' => [
+                ['title' => 'Trust Registration', 'slug' => 'trust-registration', 'icon' => 'fa-solid fa-handshake-angle'],
+                ['title' => 'Society Registration', 'slug' => 'society-registration', 'icon' => 'fa-solid fa-users-rectangle'],
+                ['title' => 'Section 8 Company Setup', 'slug' => 'section-8-company', 'icon' => 'fa-solid fa-heart-solid'],
+                ['title' => 'Income Tax Return (ITR) Filing', 'slug' => 'itr-filing', 'icon' => 'fa-solid fa-calculator'],
+                ['title' => 'GST Return Filing', 'slug' => 'gst-return', 'icon' => 'fa-solid fa-file-invoice-dollar']
+            ]
+        ]
+    ];
+    $search_services = [
+        ['title' => 'Private Limited Company', 'slug' => 'private-limited-company', 'tagline' => 'Registration in India'],
+        ['title' => 'Limited Liability Partnership (LLP)', 'slug' => 'limited-liability-partnership', 'tagline' => 'Incorporate your LLP online'],
+        ['title' => 'One Person Company (OPC)', 'slug' => 'one-person-company', 'tagline' => 'Perfect setup for solo founders'],
+        ['title' => 'GST Registration', 'slug' => 'gst-registration', 'tagline' => 'Secure your Tax Identification ID'],
+        ['title' => 'MSME (Udyam) Registration', 'slug' => 'msme-udyam', 'tagline' => 'Claim central startup benefits'],
+        ['title' => 'Trademark (TM) Registration', 'slug' => 'trademark-registration', 'tagline' => 'Secure brand logo and company names'],
+        ['title' => 'FSSAI Food License', 'slug' => 'fssai-food-license', 'tagline' => 'Food Safety registry clearance'],
+        ['title' => 'Income Tax Return (ITR) Filing', 'slug' => 'itr-filing', 'tagline' => 'Personal & corporate tax filings']
+    ];
+} else {
+    foreach ($nav_categories as &$cat) {
+        $srvStmt = $pdo->prepare("SELECT title, slug FROM services WHERE category_id = :cat_id ORDER BY id ASC");
+        $srvStmt->execute([':cat_id' => $cat['id']]);
+        $cat['services'] = $srvStmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+    unset($cat);
+}
+?>
 <!-- Top Contact & Social Bar (Default state: clean dark slate style) -->
 <div class="bg-slate-900 text-slate-300 py-2.5 text-xs border-b border-slate-800 relative z-50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-2 text-center sm:text-left">
         <!-- Contact details -->
         <div class="flex flex-wrap items-center justify-center gap-x-6 gap-y-1 font-medium">
-            <?php 
+            <?php
             $topPhones = getWebPhones();
             $firstPhone = !empty($topPhones) ? reset($topPhones) : ['label' => 'Hotline', 'value' => '+91 98765 43210'];
             ?>
@@ -23,10 +107,13 @@
                 <?php echo getWebSetting('working_hours'); ?>
             </span>
             <div class="flex items-center gap-3.5 text-slate-400">
-                <a href="#facebook" class="hover:text-brand-400 transition-colors"><i class="fa-brands fa-facebook-f"></i></a>
-                <a href="#twitter" class="hover:text-brand-400 transition-colors"><i class="fa-brands fa-twitter"></i></a>
-                <a href="#linkedin" class="hover:text-brand-400 transition-colors"><i class="fa-brands fa-linkedin-in"></i></a>
-                <a href="#instagram" class="hover:text-brand-400 transition-colors"><i class="fa-brands fa-instagram"></i></a>
+                <a href="<?php echo htmlspecialchars(getWebSetting('social_facebook')); ?>" target="_blank" class="hover:text-brand-400 transition-colors"><i class="fa-brands fa-facebook-f"></i></a>
+                <a href="<?php echo htmlspecialchars(getWebSetting('social_twitter')); ?>" target="_blank" class="hover:text-brand-400 transition-colors"><i class="fa-brands fa-twitter"></i></a>
+                <a href="<?php echo htmlspecialchars(getWebSetting('social_linkedin')); ?>" target="_blank" class="hover:text-brand-400 transition-colors"><i class="fa-brands fa-linkedin-in"></i></a>
+                <a href="<?php echo htmlspecialchars(getWebSetting('social_instagram')); ?>" target="_blank" class="hover:text-brand-400 transition-colors"><i class="fa-brands fa-instagram"></i></a>
+                <?php if (getWebSetting('social_youtube') !== '#' && getWebSetting('social_youtube') !== ''): ?>
+                    <a href="<?php echo htmlspecialchars(getWebSetting('social_youtube')); ?>" target="_blank" class="hover:text-brand-400 transition-colors"><i class="fa-brands fa-youtube"></i></a>
+                <?php endif; ?>
             </div>
         </div>
     </div>
@@ -39,7 +126,7 @@
             <!-- Logo Section -->
             <div class="flex-shrink-0 flex items-center">
                 <a href="index.php" class="flex items-center group">
-                    <img class="h-12 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
+                    <img class="h-20 w-auto "
                         src="<?php echo getWebSetting('logo_url'); ?>"
                         alt="Zenvora Global Solutions Logo">
                 </a>
@@ -60,127 +147,30 @@
 
                     <!-- Full-Width Megamenu Panel: Spans 100% of viewport width -->
                     <div class="absolute left-0 right-0 w-full mt-2 bg-white border-y border-slate-100 shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform translate-y-2 group-hover:translate-y-0 z-50">
-                        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 grid grid-cols-12 gap-8">
+                        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 grid grid-cols-12 gap-8 text-left">
 
-                            <!-- Col 1: Business Setup -->
-                            <div class="col-span-3 space-y-4">
-                                <h3 class="text-xs font-extrabold text-brand-600 uppercase tracking-widest border-b border-slate-100 pb-2">Business Setup</h3>
-                                <div class="space-y-3">
-                                    <a href="#pvt-ltd" class="flex items-start gap-2.5 text-slate-700 hover:text-brand-600 transition-colors group/link">
-                                        <i class="fa-solid fa-building text-slate-400 group-hover/link:text-brand-500 mt-0.5 text-sm"></i>
-                                        <span class="text-xs font-semibold">Private Limited Company</span>
-                                    </a>
-                                    <a href="#llp" class="flex items-start gap-2.5 text-slate-700 hover:text-brand-600 transition-colors group/link">
-                                        <i class="fa-solid fa-people-carry-box text-slate-400 group-hover/link:text-brand-500 mt-0.5 text-sm"></i>
-                                        <span class="text-xs font-semibold">Limited Liability (LLP)</span>
-                                    </a>
-                                    <a href="#opc" class="flex items-start gap-2.5 text-slate-700 hover:text-brand-600 transition-colors group/link">
-                                        <i class="fa-solid fa-user-tie text-slate-400 group-hover/link:text-brand-500 mt-0.5 text-sm"></i>
-                                        <span class="text-xs font-semibold">One Person Company</span>
-                                    </a>
-                                    <a href="#partnership-firm" class="flex items-start gap-2.5 text-slate-700 hover:text-brand-600 transition-colors group/link">
-                                        <i class="fa-solid fa-user-group text-slate-400 group-hover/link:text-brand-500 mt-0.5 text-sm"></i>
-                                        <span class="text-xs font-semibold">Partnership Firm</span>
-                                    </a>
-                                    <a href="#proprietorship" class="flex items-start gap-2.5 text-slate-700 hover:text-brand-600 transition-colors group/link">
-                                        <i class="fa-solid fa-user text-slate-400 group-hover/link:text-brand-500 mt-0.5 text-sm"></i>
-                                        <span class="text-xs font-semibold">Proprietorship Registration</span>
-                                    </a>
+                            <?php foreach ($nav_categories as $n_cat): ?>
+                                <!-- Col: <?php echo htmlspecialchars($n_cat['name']); ?> -->
+                                <div class="col-span-12 sm:col-span-6 lg:col-span-3 space-y-4">
+                                    <h3 class="text-xs font-extrabold text-brand-600 hover:text-brand-500 uppercase tracking-widest border-b border-slate-100 pb-2 transition-colors">
+                                        <a href="category.php?slug=<?php echo htmlspecialchars($n_cat['slug'] ?? ''); ?>" class="block flex items-center justify-between">
+                                            <span><?php echo htmlspecialchars($n_cat['name']); ?></span>
+                                            <i class="fa-solid fa-chevron-right text-[8px] opacity-75"></i>
+                                        </a>
+                                    </h3>
+                                    <div class="space-y-3">
+                                        <?php if (empty($n_cat['services'])): ?>
+                                            <span class="text-[10px] text-slate-400 font-semibold block italic">Coming soon...</span>
+                                        <?php endif; ?>
+                                        <?php foreach ($n_cat['services'] as $n_srv): ?>
+                                            <a href="service-detail.php?slug=<?php echo htmlspecialchars($n_srv['slug']); ?>" class="flex items-start gap-2.5 text-slate-700 hover:text-brand-600 transition-colors group/link">
+                                                <i class="fa-solid fa-circle-check text-slate-350 group-hover/link:text-brand-500 mt-0.5 text-xs"></i>
+                                                <span class="text-xs font-semibold"><?php echo htmlspecialchars($n_srv['title']); ?></span>
+                                            </a>
+                                        <?php endforeach; ?>
+                                    </div>
                                 </div>
-                            </div>
-
-                            <!-- Col 2: Registrations -->
-                            <div class="col-span-3 space-y-4">
-                                <h3 class="text-xs font-extrabold text-brand-600 uppercase tracking-widest border-b border-slate-100 pb-2">Registrations</h3>
-                                <div class="space-y-3">
-                                    <a href="#gst-reg" class="flex items-start gap-2.5 text-slate-700 hover:text-brand-600 transition-colors group/link">
-                                        <i class="fa-solid fa-receipt text-slate-400 group-hover/link:text-brand-500 mt-0.5 text-sm"></i>
-                                        <span class="text-xs font-semibold">GST Registration</span>
-                                    </a>
-                                    <a href="#msme-reg" class="flex items-start gap-2.5 text-slate-700 hover:text-brand-600 transition-colors group/link">
-                                        <i class="fa-solid fa-briefcase text-slate-400 group-hover/link:text-brand-500 mt-0.5 text-sm"></i>
-                                        <span class="text-xs font-semibold">MSME Registration</span>
-                                    </a>
-                                    <a href="#startup-india" class="flex items-start gap-2.5 text-slate-700 hover:text-brand-600 transition-colors group/link">
-                                        <i class="fa-solid fa-flag text-slate-400 group-hover/link:text-brand-500 mt-0.5 text-sm"></i>
-                                        <span class="text-xs font-semibold">Startup India Registration</span>
-                                    </a>
-                                    <a href="#iec" class="flex items-start gap-2.5 text-slate-700 hover:text-brand-600 transition-colors group/link">
-                                        <i class="fa-solid fa-globe text-slate-400 group-hover/link:text-brand-500 mt-0.5 text-sm"></i>
-                                        <span class="text-xs font-semibold">Import Export Code (IEC)</span>
-                                    </a>
-                                    <a href="#pf-esi-reg" class="flex items-start gap-2.5 text-slate-700 hover:text-brand-600 transition-colors group/link">
-                                        <i class="fa-solid fa-users text-slate-400 group-hover/link:text-brand-500 mt-0.5 text-sm"></i>
-                                        <span class="text-xs font-semibold">PF & ESI Registration</span>
-                                    </a>
-                                    <a href="#gem-reg" class="flex items-start gap-2.5 text-slate-700 hover:text-brand-600 transition-colors group/link">
-                                        <i class="fa-solid fa-cart-shopping text-slate-400 group-hover/link:text-brand-500 mt-0.5 text-sm"></i>
-                                        <span class="text-xs font-semibold">GeM Portal Registration</span>
-                                    </a>
-                                </div>
-                            </div>
-
-                            <!-- Col 3: Licenses & IPR -->
-                            <div class="col-span-3 space-y-4">
-                                <h3 class="text-xs font-extrabold text-brand-600 uppercase tracking-widest border-b border-slate-100 pb-2">Licenses & IPR</h3>
-                                <div class="space-y-3">
-                                    <a href="#fssai" class="flex items-start gap-2.5 text-slate-700 hover:text-brand-600 transition-colors group/link">
-                                        <i class="fa-solid fa-utensils text-slate-400 group-hover/link:text-brand-500 mt-0.5 text-sm"></i>
-                                        <span class="text-xs font-semibold">FSSAI License (Food Safety)</span>
-                                    </a>
-                                    <a href="#trade-license" class="flex items-start gap-2.5 text-slate-700 hover:text-brand-600 transition-colors group/link">
-                                        <i class="fa-solid fa-scale-balanced text-slate-400 group-hover/link:text-brand-500 mt-0.5 text-sm"></i>
-                                        <span class="text-xs font-semibold">Trade License</span>
-                                    </a>
-                                    <a href="#shop-est" class="flex items-start gap-2.5 text-slate-700 hover:text-brand-600 transition-colors group/link">
-                                        <i class="fa-solid fa-store text-slate-400 group-hover/link:text-brand-500 mt-0.5 text-sm"></i>
-                                        <span class="text-xs font-semibold">Shop & Establishment Act</span>
-                                    </a>
-                                    <a href="#trademark" class="flex items-start gap-2.5 text-slate-700 hover:text-brand-600 transition-colors group/link pt-2.5 border-t border-slate-100">
-                                        <i class="fa-solid fa-trademark text-slate-400 group-hover/link:text-brand-500 mt-0.5 text-sm"></i>
-                                        <span class="text-xs font-semibold">Trademark & Logo Filing</span>
-                                    </a>
-                                    <a href="#iso" class="flex items-start gap-2.5 text-slate-700 hover:text-brand-600 transition-colors group/link">
-                                        <i class="fa-solid fa-certificate text-slate-400 group-hover/link:text-brand-500 mt-0.5 text-sm"></i>
-                                        <span class="text-xs font-semibold">ISO Quality Certification</span>
-                                    </a>
-                                    <a href="#bis" class="flex items-start gap-2.5 text-slate-700 hover:text-brand-600 transition-colors group/link">
-                                        <i class="fa-solid fa-shield-halved text-slate-400 group-hover/link:text-brand-500 mt-0.5 text-sm"></i>
-                                        <span class="text-xs font-semibold">BIS Certification</span>
-                                    </a>
-                                </div>
-                            </div>
-
-                            <!-- Col 4: Tax & Compliance -->
-                            <div class="col-span-3 space-y-4">
-                                <h3 class="text-xs font-extrabold text-brand-600 uppercase tracking-widest border-b border-slate-100 pb-2">Tax & Compliance</h3>
-                                <div class="space-y-3">
-                                    <a href="#itr-filing" class="flex items-start gap-2.5 text-slate-700 hover:text-brand-600 transition-colors group/link">
-                                        <i class="fa-solid fa-calculator text-slate-400 group-hover/link:text-brand-500 mt-0.5 text-sm"></i>
-                                        <span class="text-xs font-semibold">ITR Filing (Corporate/Personal)</span>
-                                    </a>
-                                    <a href="#gst-returns" class="flex items-start gap-2.5 text-slate-700 hover:text-brand-600 transition-colors group/link">
-                                        <i class="fa-solid fa-file-invoice text-slate-400 group-hover/link:text-brand-500 mt-0.5 text-sm"></i>
-                                        <span class="text-xs font-semibold">GST Return Filing</span>
-                                    </a>
-                                    <a href="#roc" class="flex items-start gap-2.5 text-slate-700 hover:text-brand-600 transition-colors group/link">
-                                        <i class="fa-solid fa-gavel text-slate-400 group-hover/link:text-brand-500 mt-0.5 text-sm"></i>
-                                        <span class="text-xs font-semibold">ROC Annual Compliances</span>
-                                    </a>
-                                    <a href="#accounting" class="flex items-start gap-2.5 text-slate-700 hover:text-brand-600 transition-colors group/link">
-                                        <i class="fa-solid fa-book text-slate-400 group-hover/link:text-brand-500 mt-0.5 text-sm"></i>
-                                        <span class="text-xs font-semibold">Accounting & Bookkeeping</span>
-                                    </a>
-                                    <a href="#pf-esi-returns" class="flex items-start gap-2.5 text-slate-700 hover:text-brand-600 transition-colors group/link">
-                                        <i class="fa-solid fa-users-gear text-slate-400 group-hover/link:text-brand-500 mt-0.5 text-sm"></i>
-                                        <span class="text-xs font-semibold">PF & ESI Return Filing</span>
-                                    </a>
-                                    <a href="#winding-up" class="flex items-start gap-2.5 text-slate-700 hover:text-brand-600 transition-colors group/link">
-                                        <i class="fa-solid fa-ban text-slate-400 group-hover/link:text-brand-500 mt-0.5 text-sm"></i>
-                                        <span class="text-xs font-semibold">Winding Up of Company</span>
-                                    </a>
-                                </div>
-                            </div>
+                            <?php endforeach; ?>
 
                         </div>
                     </div>
@@ -204,10 +194,10 @@
             <div class="hidden md:flex items-center gap-3">
                 <!-- Desktop Search Bar -->
                 <div class="relative w-40 lg:w-48 focus-within:w-60 transition-all duration-300">
-                    <input type="text" id="site-search" placeholder="Search homepage..." 
-                           class="w-full text-[10px] font-semibold pl-8 pr-3 py-2 border border-slate-200 rounded-full focus:outline-none focus:border-brand-500 bg-slate-50 hover:bg-slate-100/50 focus:bg-white transition-all">
+                    <input type="text" id="site-search" placeholder="Search services..."
+                        class="w-full text-[10px] font-semibold pl-8 pr-3 py-2 border border-slate-200 rounded-full focus:outline-none focus:border-brand-500 bg-slate-50 hover:bg-slate-100/50 focus:bg-white transition-all">
                     <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[10px]"><i class="fa-solid fa-magnifying-glass"></i></span>
-                    
+
                     <!-- Search Results Dropdown -->
                     <div id="search-results" class="absolute right-0 top-full mt-2 w-72 bg-white border border-slate-200 rounded-2xl shadow-xl hidden z-50 p-2 text-left space-y-0.5"></div>
                 </div>
@@ -243,10 +233,10 @@
         <div class="px-4 pt-3 pb-6 space-y-4 max-h-[85vh] overflow-y-auto">
             <!-- Mobile search input -->
             <div class="relative px-3 py-1">
-                <input type="text" id="site-search-mobile" placeholder="Search homepage..." 
-                       class="w-full text-xs font-semibold pl-9 pr-3 py-2.5 border border-slate-200 rounded-full focus:outline-none focus:border-brand-500 bg-slate-50 focus:bg-white transition-all">
+                <input type="text" id="site-search-mobile" placeholder="Search services..."
+                    class="w-full text-xs font-semibold pl-9 pr-3 py-2.5 border border-slate-200 rounded-full focus:outline-none focus:border-brand-500 bg-slate-50 focus:bg-white transition-all">
                 <span class="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 text-[11px]"><i class="fa-solid fa-magnifying-glass"></i></span>
-                
+
                 <!-- Mobile Search Results Dropdown -->
                 <div id="search-results-mobile" class="absolute left-3 right-3 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-lg hidden z-50 p-2 text-left space-y-0.5"></div>
             </div>
@@ -265,23 +255,19 @@
             <div class="border-t border-slate-100 pt-3 space-y-3">
                 <span class="block px-3 py-1 text-[11px] font-bold text-slate-400 uppercase tracking-widest">Our Services</span>
 
-                <div class="space-y-1.5 pl-3">
-                    <span class="block px-3 py-0.5 text-xs font-bold text-brand-600 uppercase">Business Setup</span>
-                    <a href="#pvt-ltd" class="block pl-6 pr-3 py-1 text-sm text-slate-600 hover:text-slate-900">Private Limited Company</a>
-                    <a href="#llp" class="block pl-6 pr-3 py-1 text-sm text-slate-600 hover:text-slate-900">LLP Registration</a>
-                </div>
-
-                <div class="space-y-1.5 pl-3">
-                    <span class="block px-3 py-0.5 text-xs font-bold text-brand-600 uppercase">Registrations</span>
-                    <a href="#gst-reg" class="block pl-6 pr-3 py-1 text-sm text-slate-600 hover:text-slate-900">GST Registration</a>
-                    <a href="#msme-reg" class="block pl-6 pr-3 py-1 text-sm text-slate-600 hover:text-slate-900">MSME Registration</a>
-                </div>
-
-                <div class="space-y-1.5 pl-3">
-                    <span class="block px-3 py-0.5 text-xs font-bold text-brand-600 uppercase">Licenses & IPR</span>
-                    <a href="#fssai" class="block pl-6 pr-3 py-1 text-sm text-slate-600 hover:text-slate-900">FSSAI License</a>
-                    <a href="#trademark" class="block pl-6 pr-3 py-1 text-sm text-slate-600 hover:text-slate-900">Trademark Filing</a>
-                </div>
+                <?php foreach ($nav_categories as $m_cat): ?>
+                    <div class="space-y-1.5 pl-3 text-left">
+                        <a href="category.php?slug=<?php echo htmlspecialchars($m_cat['slug'] ?? ''); ?>" class="block px-3 py-0.5 text-xs font-bold text-brand-600 uppercase hover:text-brand-500 transition-colors"><?php echo htmlspecialchars($m_cat['name']); ?></a>
+                        <?php if (empty($m_cat['services'])): ?>
+                            <span class="block pl-6 pr-3 py-0.5 text-xs text-slate-400 italic">Coming soon...</span>
+                        <?php endif; ?>
+                        <?php foreach (($m_cat['services'] ?? []) as $m_srv): ?>
+                            <a href="service-detail.php?slug=<?php echo htmlspecialchars($m_srv['slug']); ?>" class="block pl-6 pr-3 py-1 text-sm text-slate-655 hover:text-slate-900">
+                                <?php echo htmlspecialchars($m_srv['title']); ?>
+                            </a>
+                        <?php endforeach; ?>
+                    </div>
+                <?php endforeach; ?>
             </div>
 
             <div class="mt-4 px-3">
@@ -306,17 +292,17 @@
 
             <!-- Contact Details: Phone & Email (Center - Positioned between Logo and Close Button) -->
             <div class="hidden md:flex items-center gap-8 text-slate-300">
-                <?php 
+                <?php
                 $hdrPhones = getWebPhones();
-                foreach ($hdrPhones as $hp): 
+                foreach ($hdrPhones as $hp):
                 ?>
-                <a href="tel:<?php echo htmlspecialchars($hp['value']); ?>" class="flex items-center gap-2.5 text-sm font-bold hover:text-brand-400 transition-colors group/tel-hdr">
-                    <span class="w-8 h-8 rounded-lg bg-brand-500/10 text-brand-500 flex items-center justify-center text-xs group-hover/tel-hdr:bg-brand-500 group-hover/tel-hdr:text-white transition-colors"><i class="fa-solid fa-phone"></i></span>
-                    <div class="text-left leading-none">
-                        <span class="text-[9px] text-slate-500 font-bold block mb-0.5 uppercase tracking-wider"><?php echo htmlspecialchars($hp['label']); ?></span>
-                        <span><?php echo htmlspecialchars($hp['value']); ?></span>
-                    </div>
-                </a>
+                    <a href="tel:<?php echo htmlspecialchars($hp['value']); ?>" class="flex items-center gap-2.5 text-sm font-bold hover:text-brand-400 transition-colors group/tel-hdr">
+                        <span class="w-8 h-8 rounded-lg bg-brand-500/10 text-brand-500 flex items-center justify-center text-xs group-hover/tel-hdr:bg-brand-500 group-hover/tel-hdr:text-white transition-colors"><i class="fa-solid fa-phone"></i></span>
+                        <div class="text-left leading-none">
+                            <span class="text-[9px] text-slate-500 font-bold block mb-0.5 uppercase tracking-wider"><?php echo htmlspecialchars($hp['label']); ?></span>
+                            <span><?php echo htmlspecialchars($hp['value']); ?></span>
+                        </div>
+                    </a>
                 <?php endforeach; ?>
                 <a href="mailto:<?php echo getWebSetting('email_1'); ?>" class="flex items-center gap-2.5 text-sm font-bold hover:text-brand-400 transition-colors group/mail-hdr">
                     <span class="w-8 h-8 rounded-lg bg-brand-500/10 text-brand-500 flex items-center justify-center text-xs group-hover/mail-hdr:bg-brand-500 group-hover/mail-hdr:text-white transition-colors"><i class="fa-solid fa-envelope"></i></span>
@@ -354,10 +340,13 @@
                 <!-- Social Media Icons (Centered in this flex row) -->
                 <div class="flex items-center gap-3.5 text-slate-400 border-t lg:border-t-0 border-slate-800 pt-3 lg:pt-0">
                     <span class="text-[10px] font-extrabold text-slate-500 uppercase tracking-widest mr-1.5">Connect With Us:</span>
-                    <a href="#facebook" class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-brand-500 hover:text-white flex items-center justify-center text-xs transition-all"><i class="fa-brands fa-facebook-f"></i></a>
-                    <a href="#twitter" class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-brand-500 hover:text-white flex items-center justify-center text-xs transition-all"><i class="fa-brands fa-twitter"></i></a>
-                    <a href="#linkedin" class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-brand-500 hover:text-white flex items-center justify-center text-xs transition-all"><i class="fa-brands fa-linkedin-in"></i></a>
-                    <a href="#instagram" class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-brand-500 hover:text-white flex items-center justify-center text-xs transition-all"><i class="fa-brands fa-instagram"></i></a>
+                    <a href="<?php echo htmlspecialchars(getWebSetting('social_facebook')); ?>" target="_blank" class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-brand-500 hover:text-white flex items-center justify-center text-xs transition-all"><i class="fa-brands fa-facebook-f"></i></a>
+                    <a href="<?php echo htmlspecialchars(getWebSetting('social_twitter')); ?>" target="_blank" class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-brand-500 hover:text-white flex items-center justify-center text-xs transition-all"><i class="fa-brands fa-twitter"></i></a>
+                    <a href="<?php echo htmlspecialchars(getWebSetting('social_linkedin')); ?>" target="_blank" class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-brand-500 hover:text-white flex items-center justify-center text-xs transition-all"><i class="fa-brands fa-linkedin-in"></i></a>
+                    <a href="<?php echo htmlspecialchars(getWebSetting('social_instagram')); ?>" target="_blank" class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-brand-500 hover:text-white flex items-center justify-center text-xs transition-all"><i class="fa-brands fa-instagram"></i></a>
+                    <?php if (getWebSetting('social_youtube') !== '#' && getWebSetting('social_youtube') !== ''): ?>
+                        <a href="<?php echo htmlspecialchars(getWebSetting('social_youtube')); ?>" target="_blank" class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-brand-500 hover:text-white flex items-center justify-center text-xs transition-all"><i class="fa-brands fa-youtube"></i></a>
+                    <?php endif; ?>
                 </div>
 
                 <!-- CA Advisory notice card -->
@@ -373,30 +362,14 @@
                 <div class="col-span-4 flex flex-col space-y-4 pr-8 border-r border-slate-800">
                     <span class="text-[10px] font-extrabold text-slate-500 uppercase tracking-widest mb-2 px-1">Service Categories</span>
 
-                    <button class="drawer-tab-btn active text-left text-lg font-bold transition-all flex items-center justify-between group/tab text-brand-400" data-target="drawer-tab-startup">
-                        <span>Business Startup</span>
-                        <i class="fa-solid fa-arrow-right text-xs opacity-100 translate-x-0 transition-all duration-300"></i>
-                    </button>
-                    <button class="drawer-tab-btn text-left text-lg font-bold transition-all flex items-center justify-between group/tab text-slate-300 hover:text-white" data-target="drawer-tab-registrations">
-                        <span>Registrations</span>
-                        <i class="fa-solid fa-arrow-right text-xs opacity-0 -translate-x-2 group-hover/tab:opacity-100 group-hover/tab:translate-x-0 transition-all duration-300"></i>
-                    </button>
-                    <button class="drawer-tab-btn text-left text-lg font-bold transition-all flex items-center justify-between group/tab text-slate-300 hover:text-white" data-target="drawer-tab-licenses">
-                        <span>Licenses</span>
-                        <i class="fa-solid fa-arrow-right text-xs opacity-0 -translate-x-2 group-hover/tab:opacity-100 group-hover/tab:translate-x-0 transition-all duration-300"></i>
-                    </button>
-                    <button class="drawer-tab-btn text-left text-lg font-bold transition-all flex items-center justify-between group/tab text-slate-300 hover:text-white" data-target="drawer-tab-certifications">
-                        <span>Certifications</span>
-                        <i class="fa-solid fa-arrow-right text-xs opacity-0 -translate-x-2 group-hover/tab:opacity-100 group-hover/tab:translate-x-0 transition-all duration-300"></i>
-                    </button>
-                    <button class="drawer-tab-btn text-left text-lg font-bold transition-all flex items-center justify-between group/tab text-slate-300 hover:text-white" data-target="drawer-tab-taxation">
-                        <span>Tax & Compliance</span>
-                        <i class="fa-solid fa-arrow-right text-xs opacity-0 -translate-x-2 group-hover/tab:opacity-100 group-hover/tab:translate-x-0 transition-all duration-300"></i>
-                    </button>
-                    <button class="drawer-tab-btn text-left text-lg font-bold transition-all flex items-center justify-between group/tab text-slate-300 hover:text-white" data-target="drawer-tab-ngo">
-                        <span>NGO Setup</span>
-                        <i class="fa-solid fa-arrow-right text-xs opacity-0 -translate-x-2 group-hover/tab:opacity-100 group-hover/tab:translate-x-0 transition-all duration-300"></i>
-                    </button>
+                    <?php foreach ($nav_categories as $t_idx => $t_cat):
+                        $target_id = 'drawer-tab-' . htmlspecialchars($t_cat['slug']);
+                    ?>
+                        <button class="drawer-tab-btn <?php echo $t_idx === 0 ? 'active text-brand-400' : 'text-slate-300 hover:text-white'; ?> text-left text-lg font-bold transition-all flex items-center justify-between group/tab" data-target="<?php echo $target_id; ?>">
+                            <span><?php echo htmlspecialchars($t_cat['name']); ?></span>
+                            <i class="fa-solid fa-arrow-right text-xs <?php echo $t_idx === 0 ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-2 group-hover/tab:opacity-100 group-hover/tab:translate-x-0'; ?> transition-all duration-300"></i>
+                        </button>
+                    <?php endforeach; ?>
 
                     <!-- Trust and Support Widgets -->
                     <div class="mt-8 pt-6 border-t border-slate-800 space-y-4 flex flex-col">
@@ -410,306 +383,39 @@
                         <a href="https://wa.me/<?php echo preg_replace('/[^0-9]/', '', getWebSetting('whatsapp_number')); ?>" target="_blank" class="flex items-center justify-center gap-2 w-full py-2.5 bg-green-600/10 hover:bg-green-600 text-green-500 hover:text-white rounded-lg text-xs font-bold transition-all border border-green-500/20">
                             <i class="fa-brands fa-whatsapp text-sm"></i> Chat on WhatsApp
                         </a>
-                    </div>
-                </div>
+                    </div> <!-- Close Trust card -->
+                </div> <!-- Close Left Side col-span-4 -->
 
                 <!-- Right: Active Category Inclusions (col-span-8 - Expanded & Filled with checklists/notes) -->
                 <div class="col-span-8 relative min-h-[380px]">
 
-                    <!-- Tab Content 1: Business Startup -->
-                    <div class="drawer-tab-content block transition-all duration-300" id="drawer-tab-startup">
-                        <h4 class="text-xs font-extrabold text-slate-400 uppercase tracking-widest mb-6">Incorporation Directory</h4>
-                        <div class="space-y-5">
-                            <a href="#pvt-ltd" class="group flex items-start gap-3.5">
-                                <i class="fa-solid fa-circle-check text-brand-500 mt-1.5 text-base"></i>
-                                <div>
-                                    <h5 class="text-base font-extrabold text-white group-hover:text-brand-400 transition-colors leading-snug">Private Limited Company</h5>
-                                    <p class="text-xs text-slate-300 mt-1.5 leading-relaxed">Direct MCA certificate setup including DIN, DSC, PAN, and TAN generation in 7-10 days.</p>
-                                </div>
-                            </a>
-                            <a href="#llp" class="group flex items-start gap-3.5">
-                                <i class="fa-solid fa-circle-check text-brand-500 mt-1.5 text-base"></i>
-                                <div>
-                                    <h5 class="text-base font-extrabold text-white group-hover:text-brand-400 transition-colors leading-snug">Limited Liability Partnership (LLP)</h5>
-                                    <p class="text-xs text-slate-300 mt-1.5 leading-relaxed">Lower compliance company setup best for consulting, advisory, and service partners.</p>
-                                </div>
-                            </a>
-                            <a href="#opc" class="group flex items-start gap-3.5">
-                                <i class="fa-solid fa-circle-check text-brand-500 mt-1.5 text-base"></i>
-                                <div>
-                                    <h5 class="text-base font-extrabold text-white group-hover:text-brand-400 transition-colors leading-snug">One Person Company (OPC)</h5>
-                                    <p class="text-xs text-slate-300 mt-1.5 leading-relaxed">Single founder corporate legal entity with complete limited liability benefits.</p>
-                                </div>
-                            </a>
-                            <a href="#partnership-firm" class="group flex items-start gap-3.5">
-                                <i class="fa-solid fa-circle-check text-brand-500 mt-1.5 text-base"></i>
-                                <div>
-                                    <h5 class="text-base font-extrabold text-white group-hover:text-brand-400 transition-colors leading-snug">Partnership Firm</h5>
-                                    <p class="text-xs text-slate-300 mt-1.5 leading-relaxed">Drafted partnership deeds and registration under State Registrar guidelines.</p>
-                                </div>
-                            </a>
-                            <a href="#proprietorship" class="group flex items-start gap-3.5">
-                                <i class="fa-solid fa-circle-check text-brand-500 mt-1.5 text-base"></i>
-                                <div>
-                                    <h5 class="text-base font-extrabold text-white group-hover:text-brand-400 transition-colors leading-snug">Proprietorship Setup</h5>
-                                    <p class="text-xs text-slate-300 mt-1.5 leading-relaxed">Fast-track setup with GST and MSME credentials to open current accounts.</p>
-                                </div>
-                            </a>
-
-                            <!-- Checklist / Notes Panel -->
-                            <div class="mt-8 p-4 rounded-xl bg-slate-950 border border-slate-850 text-slate-400 space-y-2">
-                                <h6 class="text-[10px] font-extrabold text-white uppercase tracking-wider flex items-center gap-1.5"><i class="fa-solid fa-file-invoice text-brand-500"></i> Required Documents for Setup:</h6>
-                                <p class="text-[10px] leading-relaxed">Aadhaar Card, PAN Card, Passport Size Photo, Utility Bill (Electricity/Water) of business address, and Rent Agreement.</p>
+                    <?php foreach ($nav_categories as $t_idx => $t_cat):
+                        $target_id = 'drawer-tab-' . htmlspecialchars($t_cat['slug']);
+                    ?>
+                        <!-- Tab Content: <?php echo htmlspecialchars($t_cat['name']); ?> -->
+                        <div class="drawer-tab-content <?php echo $t_idx === 0 ? 'block' : 'hidden'; ?> transition-all duration-300" id="<?php echo $target_id; ?>">
+                            <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-6">
+                                <h4 class="text-xs font-extrabold text-slate-400 uppercase tracking-widest"><?php echo htmlspecialchars($t_cat['name']); ?> Directory</h4>
+                                <a href="category.php?slug=<?php echo htmlspecialchars($t_cat['slug'] ?? ''); ?>" class="text-[10px] font-black uppercase tracking-wider text-brand-400 hover:text-brand-300 flex items-center gap-1.5 transition-colors">
+                                    Category Hub <i class="fa-solid fa-up-right-from-square text-[8px]"></i>
+                                </a>
+                            </div>
+                            <div class="space-y-5 text-left">
+                                <?php if (empty($t_cat['services'])): ?>
+                                    <span class="text-xs text-slate-400 italic block">No services configured under this category yet.</span>
+                                <?php endif; ?>
+                                <?php foreach (($t_cat['services'] ?? []) as $t_srv): ?>
+                                    <a href="service-detail.php?slug=<?php echo htmlspecialchars($t_srv['slug']); ?>" class="group flex items-start gap-3.5">
+                                        <i class="fa-solid fa-circle-check text-brand-500 mt-1.5 text-base"></i>
+                                        <div>
+                                            <h5 class="text-base font-extrabold text-white group-hover:text-brand-400 transition-colors leading-snug"><?php echo htmlspecialchars($t_srv['title']); ?></h5>
+                                            <p class="text-xs text-slate-400 mt-1 leading-relaxed">Dynamic corporate processing page. Outsource your application pipeline to our panel of CA advisors.</p>
+                                        </div>
+                                    </a>
+                                <?php endforeach; ?>
                             </div>
                         </div>
-                    </div>
-
-                    <!-- Tab Content 2: Registrations -->
-                    <div class="drawer-tab-content hidden transition-all duration-300" id="drawer-tab-registrations">
-                        <h4 class="text-xs font-extrabold text-slate-400 uppercase tracking-widest mb-6">Core Registrations</h4>
-                        <div class="space-y-5">
-                            <a href="#gst-reg" class="group flex items-start gap-3.5">
-                                <i class="fa-solid fa-circle-check text-brand-500 mt-1.5 text-base"></i>
-                                <div>
-                                    <h5 class="text-base font-extrabold text-white group-hover:text-brand-400 transition-colors leading-snug">GST Registration</h5>
-                                    <p class="text-xs text-slate-300 mt-1.5 leading-relaxed">Registration for CGST, SGST, IGST, and composition schemes for retail and e-commerce.</p>
-                                </div>
-                            </a>
-                            <a href="#msme-reg" class="group flex items-start gap-3.5">
-                                <i class="fa-solid fa-circle-check text-brand-500 mt-1.5 text-base"></i>
-                                <div>
-                                    <h5 class="text-base font-extrabold text-white group-hover:text-brand-400 transition-colors leading-snug">MSME / Udyam Certificate</h5>
-                                    <p class="text-xs text-slate-300 mt-1.5 leading-relaxed">Claim interest concessions, credit guarantees, and government vendor privileges.</p>
-                                </div>
-                            </a>
-                            <a href="#startup-india" class="group flex items-start gap-3.5">
-                                <i class="fa-solid fa-circle-check text-brand-500 mt-1.5 text-base"></i>
-                                <div>
-                                    <h5 class="text-base font-extrabold text-white group-hover:text-brand-400 transition-colors leading-snug">Startup India DPIIT Registration</h5>
-                                    <p class="text-xs text-slate-300 mt-1.5 leading-relaxed">Get recognized by DPIIT to obtain income tax exemptions and patent subsidies.</p>
-                                </div>
-                            </a>
-                            <a href="#iec" class="group flex items-start gap-3.5">
-                                <i class="fa-solid fa-circle-check text-brand-500 mt-1.5 text-base"></i>
-                                <div>
-                                    <h5 class="text-base font-extrabold text-white group-hover:text-brand-400 transition-colors leading-snug">Import Export Code (IEC)</h5>
-                                    <p class="text-xs text-slate-300 mt-1.5 leading-relaxed">DGFT registration code mandatory for cross-border trading and global logistics.</p>
-                                </div>
-                            </a>
-                            <a href="#pf-esi-reg" class="group flex items-start gap-3.5">
-                                <i class="fa-solid fa-circle-check text-brand-500 mt-1.5 text-base"></i>
-                                <div>
-                                    <h5 class="text-base font-extrabold text-white group-hover:text-brand-400 transition-colors leading-snug">PF & ESI Corporate Registration</h5>
-                                    <p class="text-xs text-slate-300 mt-1.5 leading-relaxed">Provident fund and state health insurance portal registrations for staff.</p>
-                                </div>
-                            </a>
-                            <a href="#gem-reg" class="group flex items-start gap-3.5">
-                                <i class="fa-solid fa-circle-check text-brand-500 mt-1.5 text-base"></i>
-                                <div>
-                                    <h5 class="text-base font-extrabold text-white group-hover:text-brand-400 transition-colors leading-snug">GeM Portal Registration</h5>
-                                    <p class="text-xs text-slate-300 mt-1.5 leading-relaxed">Register as a seller to participate in central and state government e-tenders.</p>
-                                </div>
-                            </a>
-
-                            <!-- Checklist / Notes Panel -->
-                            <div class="mt-8 p-4 rounded-xl bg-slate-950 border border-slate-850 text-slate-400 space-y-2">
-                                <h6 class="text-[10px] font-extrabold text-white uppercase tracking-wider flex items-center gap-1.5"><i class="fa-solid fa-clock text-brand-500"></i> Turnaround Timelines:</h6>
-                                <p class="text-[10px] leading-relaxed">GST Registration: 3-5 days | MSME Udyam: 1 day | Import Export Code: 2 days. Fast digital delivery.</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Tab Content 3: Licenses -->
-                    <div class="drawer-tab-content hidden transition-all duration-300" id="drawer-tab-licenses">
-                        <h4 class="text-xs font-extrabold text-slate-400 uppercase tracking-widest mb-6">Government Permits</h4>
-                        <div class="space-y-5">
-                            <a href="#fssai" class="group flex items-start gap-3.5">
-                                <i class="fa-solid fa-circle-check text-brand-500 mt-1.5 text-base"></i>
-                                <div>
-                                    <h5 class="text-base font-extrabold text-white group-hover:text-brand-400 transition-colors leading-snug">FSSAI License</h5>
-                                    <p class="text-xs text-slate-300 mt-1.5 leading-relaxed">Food business registrations, state licenses, and central manufacturing approvals.</p>
-                                </div>
-                            </a>
-                            <a href="#trade-license" class="group flex items-start gap-3.5">
-                                <i class="fa-solid fa-circle-check text-brand-500 mt-1.5 text-base"></i>
-                                <div>
-                                    <h5 class="text-base font-extrabold text-white group-hover:text-brand-400 transition-colors leading-snug">Trade License</h5>
-                                    <p class="text-xs text-slate-300 mt-1.5 leading-relaxed">Municipal approvals ensuring your commercial facility is legal to operate.</p>
-                                </div>
-                            </a>
-                            <a href="#shop-est" class="group flex items-start gap-3.5">
-                                <i class="fa-solid fa-circle-check text-brand-500 mt-1.5 text-base"></i>
-                                <div>
-                                    <h5 class="text-base font-extrabold text-white group-hover:text-brand-400 transition-colors leading-snug">Shop & Establishment Act</h5>
-                                    <p class="text-xs text-slate-300 mt-1.5 leading-relaxed">Labor board registrations verifying employment and holiday rules compliance.</p>
-                                </div>
-                            </a>
-                            <a href="#clra" class="group flex items-start gap-3.5">
-                                <i class="fa-solid fa-circle-check text-brand-500 mt-1.5 text-base"></i>
-                                <div>
-                                    <h5 class="text-base font-extrabold text-white group-hover:text-brand-400 transition-colors leading-snug">CLRA Labour License</h5>
-                                    <p class="text-xs text-slate-300 mt-1.5 leading-relaxed">Labor registration mandated for agencies hiring contractual workers.</p>
-                                </div>
-                            </a>
-                            <a href="#lwf" class="group flex items-start gap-3.5">
-                                <i class="fa-solid fa-circle-check text-brand-500 mt-1.5 text-base"></i>
-                                <div>
-                                    <h5 class="text-base font-extrabold text-white group-hover:text-brand-400 transition-colors leading-snug">Labour Welfare Fund (LWF)</h5>
-                                    <p class="text-xs text-slate-300 mt-1.5 leading-relaxed">State welfare board filings mandatory for factories and retail businesses.</p>
-                                </div>
-                            </a>
-
-                            <!-- Checklist / Notes Panel -->
-                            <div class="mt-8 p-4 rounded-xl bg-slate-950 border border-slate-850 text-slate-400 space-y-2">
-                                <h6 class="text-[10px] font-extrabold text-white uppercase tracking-wider flex items-center gap-1.5"><i class="fa-solid fa-circle-info text-brand-500"></i> Important Regulatory Note:</h6>
-                                <p class="text-[10px] leading-relaxed">FSSAI food licenses are graded as Basic, State, or Central based on annual turnover thresholds. Consult our legal expert for the correct class selection.</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Tab Content 4: Certifications -->
-                    <div class="drawer-tab-content hidden transition-all duration-300" id="drawer-tab-certifications">
-                        <h4 class="text-xs font-extrabold text-slate-400 uppercase tracking-widest mb-6">IPR & Quality Marks</h4>
-                        <div class="space-y-5">
-                            <a href="#trademark" class="group flex items-start gap-3.5">
-                                <i class="fa-solid fa-circle-check text-brand-500 mt-1.5 text-base"></i>
-                                <div>
-                                    <h5 class="text-base font-extrabold text-white group-hover:text-brand-400 transition-colors leading-snug">Trademark Registration</h5>
-                                    <p class="text-xs text-slate-300 mt-1.5 leading-relaxed">Secure exclusive ownership of corporate logos, names, slogans, and symbols.</p>
-                                </div>
-                            </a>
-                            <a href="#iso" class="group flex items-start gap-3.5">
-                                <i class="fa-solid fa-circle-check text-brand-500 mt-1.5 text-base"></i>
-                                <div>
-                                    <h5 class="text-base font-extrabold text-white group-hover:text-brand-400 transition-colors leading-snug">ISO Quality Certificate</h5>
-                                    <p class="text-xs text-slate-300 mt-1.5 leading-relaxed">ISO 9001, 14001, and 27001 standard audits and certificates for businesses.</p>
-                                </div>
-                            </a>
-                            <a href="#bis" class="group flex items-start gap-3.5">
-                                <i class="fa-solid fa-circle-check text-brand-500 mt-1.5 text-base"></i>
-                                <div>
-                                    <h5 class="text-base font-extrabold text-white group-hover:text-brand-400 transition-colors leading-snug">BIS Certification</h5>
-                                    <p class="text-xs text-slate-300 mt-1.5 leading-relaxed">ISI product testing standards approval and licensing from BIS boards.</p>
-                                </div>
-                            </a>
-                            <a href="#dsc" class="group flex items-start gap-3.5">
-                                <i class="fa-solid fa-circle-check text-brand-500 mt-1.5 text-base"></i>
-                                <div>
-                                    <h5 class="text-base font-extrabold text-white group-hover:text-brand-400 transition-colors leading-snug">Digital Signature (DSC)</h5>
-                                    <p class="text-xs text-slate-300 mt-1.5 leading-relaxed">Secure Class 3 DSC keys mandatory for director signings and filings.</p>
-                                </div>
-                            </a>
-                            <a href="#make-in-india" class="group flex items-start gap-3.5">
-                                <i class="fa-solid fa-circle-check text-brand-500 mt-1.5 text-base"></i>
-                                <div>
-                                    <h5 class="text-base font-extrabold text-white group-hover:text-brand-400 transition-colors leading-snug">Make in India</h5>
-                                    <p class="text-xs text-slate-300 mt-1.5 leading-relaxed">Manufacturing credentials, subsidies, and global trading recognition.</p>
-                                </div>
-                            </a>
-
-                            <!-- Checklist / Notes Panel -->
-                            <div class="mt-8 p-4 rounded-xl bg-slate-950 border border-slate-850 text-slate-400 space-y-2">
-                                <h6 class="text-[10px] font-extrabold text-white uppercase tracking-wider flex items-center gap-1.5"><i class="fa-solid fa-shield text-brand-500"></i> Quality Audit Standards:</h6>
-                                <p class="text-[10px] leading-relaxed">ISO quality audits are conducted by IRCA certified lead auditors. Full documentation support is provided by our compliance managers.</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Tab Content 5: Taxation -->
-                    <div class="drawer-tab-content hidden transition-all duration-300" id="drawer-tab-taxation">
-                        <h4 class="text-xs font-extrabold text-slate-400 uppercase tracking-widest mb-6">Filings & Regulatory Compliance</h4>
-                        <div class="space-y-5">
-                            <a href="#itr-filing" class="group flex items-start gap-3.5">
-                                <i class="fa-solid fa-circle-check text-brand-500 mt-1.5 text-base"></i>
-                                <div>
-                                    <h5 class="text-base font-extrabold text-white group-hover:text-brand-400 transition-colors leading-snug">Income Tax Return (ITR)</h5>
-                                    <p class="text-xs text-slate-300 mt-1.5 leading-relaxed">Annual corporate taxes filing, profit audit preparation, and personal ITR filing.</p>
-                                </div>
-                            </a>
-                            <a href="#gst-returns" class="group flex items-start gap-3.5">
-                                <i class="fa-solid fa-circle-check text-brand-500 mt-1.5 text-base"></i>
-                                <div>
-                                    <h5 class="text-base font-extrabold text-white group-hover:text-brand-400 transition-colors leading-snug">GST Returns Filing</h5>
-                                    <p class="text-xs text-slate-300 mt-1.5 leading-relaxed">Monthly GSTR-1 sales uploads, GSTR-3B tax challans, and annual GST audits.</p>
-                                </div>
-                            </a>
-                            <a href="#roc" class="group flex items-start gap-3.5">
-                                <i class="fa-solid fa-circle-check text-brand-500 mt-1.5 text-base"></i>
-                                <div>
-                                    <h5 class="text-base font-extrabold text-white group-hover:text-brand-400 transition-colors leading-snug">ROC Annual Compliances</h5>
-                                    <p class="text-xs text-slate-300 mt-1.5 leading-relaxed">Annual MCA filings (AOC-4, MGT-7) ensuring your company stays active.</p>
-                                </div>
-                            </a>
-                            <a href="#accounting" class="group flex items-start gap-3.5">
-                                <i class="fa-solid fa-circle-check text-brand-500 mt-1.5 text-base"></i>
-                                <div>
-                                    <h5 class="text-base font-extrabold text-white group-hover:text-brand-400 transition-colors leading-snug">Outsourced Bookkeeping</h5>
-                                    <p class="text-xs text-slate-300 mt-1.5 leading-relaxed">Outsource ledger entries, monthly banking reconciliation, and balance sheets to CAs.</p>
-                                </div>
-                            </a>
-                            <a href="#winding-up" class="group flex items-start gap-3.5">
-                                <i class="fa-solid fa-circle-check text-brand-500 mt-1.5 text-base"></i>
-                                <div>
-                                    <h5 class="text-base font-extrabold text-white group-hover:text-brand-400 transition-colors leading-snug">Winding Up of Company</h5>
-                                    <p class="text-xs text-slate-300 mt-1.5 leading-relaxed">Dissolve and strike off your inactive company from MCA registers legally.</p>
-                                </div>
-                            </a>
-
-                            <!-- Checklist / Notes Panel -->
-                            <div class="mt-8 p-4 rounded-xl bg-slate-950 border border-slate-850 text-slate-400 space-y-2">
-                                <h6 class="text-[10px] font-extrabold text-white uppercase tracking-wider flex items-center gap-1.5"><i class="fa-solid fa-calendar-days text-brand-500"></i> Annual Compliance Calendar:</h6>
-                                <p class="text-[10px] leading-relaxed">Corporate ROC annual returns filing due dates generally fall within 30 days of the AGM. Late filings attract penalty fees of ₹100/day.</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Tab Content 6: NGO Setup -->
-                    <div class="drawer-tab-content hidden transition-all duration-300" id="drawer-tab-ngo">
-                        <h4 class="text-xs font-extrabold text-slate-400 uppercase tracking-widest mb-6">NGO & Charitable Formations</h4>
-                        <div class="space-y-5">
-                            <a href="#section8" class="group flex items-start gap-3.5">
-                                <i class="fa-solid fa-circle-check text-brand-500 mt-1.5 text-base"></i>
-                                <div>
-                                    <h5 class="text-base font-extrabold text-white group-hover:text-brand-400 transition-colors leading-snug">Section 8 Company Setup</h5>
-                                    <p class="text-xs text-slate-300 mt-1.5 leading-relaxed">Non-profit corporate structure registration with MCA and license approvals.</p>
-                                </div>
-                            </a>
-                            <a href="#trust" class="group flex items-start gap-3.5">
-                                <i class="fa-solid fa-circle-check text-brand-500 mt-1.5 text-base"></i>
-                                <div>
-                                    <h5 class="text-base font-extrabold text-white group-hover:text-brand-400 transition-colors leading-snug">Trust & Society Registration</h5>
-                                    <p class="text-xs text-slate-300 mt-1.5 leading-relaxed">Trust deeds drafting, society bylaws, and registration with sub-registrars.</p>
-                                </div>
-                            </a>
-                            <a href="#12a-80g" class="group flex items-start gap-2.5">
-                                <i class="fa-solid fa-circle-check text-brand-500 mt-1.5 text-base"></i>
-                                <div>
-                                    <h5 class="text-base font-extrabold text-white group-hover:text-brand-400 transition-colors leading-snug">12A & 80G Tax Exemption</h5>
-                                    <p class="text-xs text-slate-300 mt-1.5 leading-relaxed">Obtain tax-exempt credentials to receive donations and CSR grants.</p>
-                                </div>
-                            </a>
-                            <a href="#csr-reg" class="group flex items-start gap-2.5">
-                                <i class="fa-solid fa-circle-check text-brand-500 mt-1.5 text-base"></i>
-                                <div>
-                                    <h5 class="text-base font-extrabold text-white group-hover:text-brand-400 transition-colors leading-snug">CSR-1 Registration</h5>
-                                    <p class="text-xs text-slate-300 mt-1.5 leading-relaxed">Register with MCA to receive Corporate Social Responsibility funds.</p>
-                                </div>
-                            </a>
-                            <a href="#fcra" class="group flex items-start gap-2.5">
-                                <i class="fa-solid fa-circle-check text-brand-500 mt-1.5 text-base"></i>
-                                <div>
-                                    <h5 class="text-base font-extrabold text-white group-hover:text-brand-400 transition-colors leading-snug">FCRA Registration</h5>
-                                    <p class="text-xs text-slate-300 mt-1.5 leading-relaxed">Ministry of Home Affairs permit required to receive foreign donations.</p>
-                                </div>
-                            </a>
-
-                            <!-- Checklist / Notes Panel -->
-                            <div class="mt-8 p-4 rounded-xl bg-slate-950 border border-slate-850 text-slate-400 space-y-2">
-                                <h6 class="text-[10px] font-extrabold text-white uppercase tracking-wider flex items-center gap-1.5"><i class="fa-solid fa-hands-holding-child text-brand-500"></i> Deductions and Tax Exemptions:</h6>
-                                <p class="text-[10px] leading-relaxed">Obtaining both 12A and 80G registrations allows donors to deduct up to 50% of charitable donations from their taxable income.</p>
-                            </div>
-                        </div>
-                    </div>
+                    <?php endforeach; ?>
 
                 </div>
 
@@ -804,12 +510,23 @@
 
         // Search Autocomplete and Scroll-To Logic
         const searchSections = [
+            // Home page sections
             { id: '#about', title: 'About Zenvora / Compliance Partner', desc: 'Overview of CA/CS team & legal partner history', keys: ['about', 'partner', 'trusted', 'expert', 'history', 'lawyer', 'legal'] },
             { id: '#process', title: 'Simplified Onboarding / 4 Steps', desc: 'Timeline showing document submission & delivery', keys: ['process', 'onboarding', 'how it works', 'steps', 'workflow', 'filing', 'delivery'] },
             { id: '#why-choose-us', title: 'Why Zenvora / Growth Benefits', desc: 'Startup-engineered speed, cloud vault & CA advisory', keys: ['why', 'benefits', 'speed', 'incorporation', 'vault', 'billing', 'growth'] },
             { id: '#stats', title: 'Zenvora Metrics / Compliance Score', desc: '99.8% filing accuracy and active users', keys: ['stats', 'metrics', 'numbers', 'accuracy', 'turnaround', 'experts'] },
             { id: '#pricing', title: 'Pricing Packages / Flat Fees', desc: 'Flexible packages for early and scaling startups', keys: ['pricing', 'pricing plans', 'packages', 'fees', 'costs', 'charges'] },
-            { id: '#contact', title: 'Book Consultation / Help Desk', desc: 'Capture form to speak directly with an advisor', keys: ['contact', 'book call', 'phone', 'email', 'support', 'help', 'advisory'] }
+            { id: '#contact', title: 'Book Consultation / Help Desk', desc: 'Capture form to speak directly with an advisor', keys: ['contact', 'book call', 'phone', 'email', 'support', 'help', 'advisory'] },
+            
+            // Dynamic services
+            <?php foreach ($search_services as $s_item): ?>
+            {
+                slug: '<?php echo addslashes($s_item['slug']); ?>',
+                title: '<?php echo addslashes($s_item['title']); ?>',
+                desc: '<?php echo addslashes($s_item['tagline']); ?>',
+                keys: ['service', '<?php echo strtolower(addslashes($s_item['title'])); ?>', '<?php echo strtolower(addslashes($s_item['tagline'])); ?>']
+            },
+            <?php endforeach; ?>
         ];
 
         function handleSearchInput(inputEl, resultsEl) {
@@ -821,33 +538,49 @@
 
             const matches = searchSections.filter(sec => {
                 return sec.title.toLowerCase().includes(query) ||
-                       sec.desc.toLowerCase().includes(query) ||
-                       sec.keys.some(k => k.includes(query));
+                    sec.desc.toLowerCase().includes(query) ||
+                    sec.keys.some(k => k.includes(query));
             });
 
             if (matches.length === 0) {
                 resultsEl.innerHTML = `
                     <div class="p-3 text-[10px] text-slate-450 font-bold text-center">
-                        No matching sections found.
+                        No matching services or sections found.
                     </div>
                 `;
             } else {
-                resultsEl.innerHTML = matches.map(match => `
-                    <button type="button" class="search-result-btn w-full text-left p-2.5 hover:bg-slate-50 rounded-xl transition-colors flex flex-col" data-target="${match.id}">
-                        <span class="text-[11px] font-extrabold text-slate-900 flex items-center gap-1.5">
-                            <i class="fa-solid fa-arrow-turn-up text-brand-500 text-[9px] rotate-90"></i> ${match.title}
-                        </span>
-                        <span class="text-[9px] text-slate-400 font-semibold mt-0.5">${match.desc}</span>
-                    </button>
-                `).join('');
+                resultsEl.innerHTML = matches.map(match => {
+                    const isService = !!match.slug;
+                    const iconHtml = isService 
+                        ? `<i class="fa-solid fa-gears text-brand-500 text-[10px]"></i>` 
+                        : `<i class="fa-solid fa-arrow-turn-up text-brand-500 text-[9px] rotate-90"></i>`;
+                    const typeLabel = isService ? 'Service' : 'Section';
+                    return `
+                        <button type="button" class="search-result-btn w-full text-left p-2.5 hover:bg-slate-50 rounded-xl transition-colors flex flex-col" 
+                                data-type="${isService ? 'service' : 'section'}" 
+                                data-target="${isService ? match.slug : match.id}">
+                            <span class="text-[11px] font-extrabold text-slate-900 flex items-center gap-1.5">
+                                ${iconHtml} ${match.title}
+                                <span class="ml-auto text-[8px] text-slate-400 border border-slate-200 px-1.5 py-0.5 rounded uppercase font-semibold">${typeLabel}</span>
+                            </span>
+                            <span class="text-[9px] text-slate-400 font-semibold mt-0.5">${match.desc}</span>
+                        </button>
+                    `;
+                }).join('');
 
                 resultsEl.querySelectorAll('.search-result-btn').forEach(btn => {
                     btn.addEventListener('mousedown', (e) => {
                         e.preventDefault();
-                        const targetId = btn.getAttribute('data-target');
+                        const type = btn.getAttribute('data-type');
+                        const target = btn.getAttribute('data-target');
                         inputEl.value = '';
                         resultsEl.classList.add('hidden');
-                        navigateToSection(targetId);
+                        
+                        if (type === 'service') {
+                            window.location.href = 'service-detail.php?slug=' + encodeURIComponent(target);
+                        } else {
+                            navigateToSection(target);
+                        }
                     });
                 });
             }
@@ -857,18 +590,21 @@
         function navigateToSection(targetId) {
             const path = window.location.pathname;
             const isHomePage = path.endsWith('index.php') || path.endsWith('/') || !path.includes('.php');
-            
+
             if (!isHomePage) {
                 window.location.href = 'index.php' + targetId;
             } else {
                 const targetEl = document.querySelector(targetId);
                 if (targetEl) {
-                    targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    
+                    targetEl.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'center'
+                    });
+
                     targetEl.classList.remove('glow-section');
                     void targetEl.offsetWidth; // Reflow
                     targetEl.classList.add('glow-section');
-                    
+
                     setTimeout(() => {
                         targetEl.classList.remove('glow-section');
                     }, 2500);
@@ -893,6 +629,28 @@
             mInput.addEventListener('blur', () => setTimeout(() => mResults.classList.add('hidden'), 200));
             mInput.addEventListener('focus', () => {
                 if (mInput.value.trim() !== '') mResults.classList.remove('hidden');
+            });
+        }
+
+        // Mobile Menu Toggle logic
+        const mobileMenuBtn = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const menuIconOpen = document.getElementById('menu-icon-open');
+        const menuIconClose = document.getElementById('menu-icon-close');
+
+        if (mobileMenuBtn && mobileMenu) {
+            mobileMenuBtn.addEventListener('click', () => {
+                const isExpanded = mobileMenuBtn.getAttribute('aria-expanded') === 'true';
+                mobileMenuBtn.setAttribute('aria-expanded', !isExpanded);
+                
+                // Toggle mobile menu visibility
+                mobileMenu.classList.toggle('hidden');
+                
+                // Toggle hamburger and close icons
+                if (menuIconOpen && menuIconClose) {
+                    menuIconOpen.classList.toggle('hidden');
+                    menuIconClose.classList.toggle('hidden');
+                }
             });
         }
     });

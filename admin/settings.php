@@ -22,18 +22,75 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $pdo !== null) {
     try {
         $pdo->beginTransaction();
         
+        // Handle logo file upload if provided
+        if (isset($_FILES['logo_file']) && $_FILES['logo_file']['error'] === UPLOAD_ERR_OK) {
+            $fileTmpPath = $_FILES['logo_file']['tmp_name'];
+            $fileName = $_FILES['logo_file']['name'];
+            $fileNameCmps = explode(".", $fileName);
+            $fileExtension = strtolower(end($fileNameCmps));
+            $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'ico', 'svg', 'webp'];
+            
+            if (in_array($fileExtension, $allowedExtensions)) {
+                $uploadFileDir = '../assets/images/logo/';
+                if (!is_dir($uploadFileDir)) {
+                    mkdir($uploadFileDir, 0777, true);
+                }
+                $newFileName = 'uploaded_logo_' . time() . '.' . $fileExtension;
+                $dest_path = $uploadFileDir . $newFileName;
+                if (move_uploaded_file($fileTmpPath, $dest_path)) {
+                    $_POST['logo_url'] = 'assets/images/logo/' . $newFileName;
+                }
+            }
+        }
+
+        // Handle favicon file upload if provided
+        if (isset($_FILES['favicon_file']) && $_FILES['favicon_file']['error'] === UPLOAD_ERR_OK) {
+            $fileTmpPath = $_FILES['favicon_file']['tmp_name'];
+            $fileName = $_FILES['favicon_file']['name'];
+            $fileNameCmps = explode(".", $fileName);
+            $fileExtension = strtolower(end($fileNameCmps));
+            $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'ico', 'svg', 'webp'];
+            
+            if (in_array($fileExtension, $allowedExtensions)) {
+                $uploadFileDir = '../assets/images/logo/';
+                if (!is_dir($uploadFileDir)) {
+                    mkdir($uploadFileDir, 0777, true);
+                }
+                $newFileName = 'uploaded_favicon_' . time() . '.' . $fileExtension;
+                $dest_path = $uploadFileDir . $newFileName;
+                if (move_uploaded_file($fileTmpPath, $dest_path)) {
+                    $_POST['favicon'] = 'assets/images/logo/' . $newFileName;
+                }
+            }
+        }
+
         // Handle standard settings
         $settingsToUpdate = [
             'logo_url',
             'favicon',
             'email_1',
             'email_2',
+            'phone_1',
+            'address_noida',
             'map_iframe',
             'working_hours',
-            'whatsapp_number'
+            'whatsapp_number',
+            'social_facebook',
+            'social_twitter',
+            'social_linkedin',
+            'social_instagram',
+            'social_youtube',
+            'stat_ops_count',
+            'stat_ops_label',
+            'stat_accuracy_count',
+            'stat_accuracy_label',
+            'stat_panel_count',
+            'stat_panel_label',
+            'stat_speed_count',
+            'stat_speed_label'
         ];
         
-        $updateStmt = $pdo->prepare("UPDATE settings SET setting_value = :val WHERE setting_key = :key");
+        $updateStmt = $pdo->prepare("INSERT INTO settings (setting_key, setting_value) VALUES (:key, :val) ON DUPLICATE KEY UPDATE setting_value = :val");
         
         foreach ($settingsToUpdate as $key) {
             if (isset($_POST[$key])) {
@@ -112,6 +169,7 @@ if ($pdo !== null) {
 // Decode lists or default to empty arrays
 $phones = json_decode($webSettings['phone_numbers'] ?? '[]', true);
 $addresses = json_decode($webSettings['office_addresses'] ?? '[]', true);
+$testimonials = json_decode($webSettings['homepage_testimonials'] ?? '[]', true);
 ?>
 <!DOCTYPE html>
 <html lang="en" class="h-full bg-slate-50">
@@ -124,12 +182,24 @@ $addresses = json_decode($webSettings['office_addresses'] ?? '[]', true);
     <!-- Load Head dependencies (Tailwind CDN, Fonts, Font Awesome) -->
     <?php include_once '../components/head.php'; ?>
     <script>
-        // Custom configurations for clean typography
         tailwind.config = {
             theme: {
                 extend: {
+                    colors: {
+                        brand: {
+                            50: '#fdfbf7',
+                            100: '#f9f3e6',
+                            200: '#f1e2c5',
+                            300: '#e5ca97',
+                            400: '#d7ac63',
+                            500: '#bc8731',
+                            600: '#a36d26',
+                            700: '#83521d',
+                            900: '#573316',
+                        }
+                    },
                     fontFamily: {
-                        sans: ['Space Grotesk', 'sans-serif'],
+                        sans: ['"Space Grotesk"', 'sans-serif'],
                     }
                 }
             }
@@ -142,58 +212,61 @@ $addresses = json_decode($webSettings['office_addresses'] ?? '[]', true);
     <div class="flex h-screen overflow-hidden">
         
         <!-- Sidebar Navigation (Collapsible, w-64 -> w-0) -->
-        <aside id="admin-sidebar" class="w-64 bg-slate-900 flex flex-col justify-between transition-all duration-300 ease-in-out flex-shrink-0 z-30 overflow-hidden relative">
-            <div class="flex flex-col flex-grow">
-                <!-- Branding Header -->
-                <div class="h-16 flex items-center justify-between px-6 border-b border-slate-800 flex-shrink-0">
-                    <div class="flex items-center gap-3">
-                        <img class="h-8 w-auto object-contain bg-white/10 p-1 rounded-lg" src="../assets/images/logo/Zenvora_Global_Solutions_Logo.png" alt="Logo">
-                        <span class="text-xs font-black text-white uppercase tracking-widest block whitespace-nowrap">Zenvora Admin</span>
+        <aside id="admin-sidebar" class="w-64 bg-slate-900 flex flex-col justify-between transition-all duration-300 ease-in-out flex-shrink-0 z-30 overflow-hidden relative border-r border-slate-850 p-6">
+            <div class="flex flex-col flex-grow space-y-8">
+                <!-- Branding -->
+                <div class="flex items-center gap-3">
+                    <img class="h-9 w-auto object-contain bg-white/5 p-1 rounded-lg" src="../<?php echo htmlspecialchars(getWebSetting('logo_url') ?: 'assets/images/logo/Zenvora_Global_Solutions_Logo.png'); ?>" alt="Logo">
+                    <div>
+                        <span class="text-xs font-black tracking-widest text-brand-400 block uppercase">Zenvora</span>
+                        <span class="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Admin Control</span>
                     </div>
                 </div>
-                
-                <!-- Nav Links -->
-                <nav class="flex-1 px-4 py-6 space-y-2.5 overflow-y-auto">
-                    <span class="text-[9px] font-black text-slate-550 uppercase tracking-widest pl-3 block mb-2 whitespace-nowrap">Core Directory</span>
-                    
-                    <a href="admin.php" class="flex items-center gap-3 px-3 py-2.5 text-xs font-bold text-slate-400 hover:text-white hover:bg-slate-800/50 rounded-xl transition-colors whitespace-nowrap">
-                        <i class="fa-solid fa-chart-line text-sm"></i>
-                        <span>Dashboard Overview</span>
-                    </a>
-                    
-                    <a href="admin.php#leads" class="flex items-center gap-3 px-3 py-2.5 text-xs font-bold text-slate-400 hover:text-white hover:bg-slate-800/50 rounded-xl transition-colors whitespace-nowrap">
-                        <i class="fa-solid fa-list-check text-sm"></i>
-                        <span>Lead Enquiries</span>
-                    </a>
 
-                    <a href="homepage.php" class="flex items-center gap-3 px-3 py-2.5 text-xs font-bold text-slate-400 hover:text-white hover:bg-slate-800/50 rounded-xl transition-colors whitespace-nowrap">
-                        <i class="fa-solid fa-house-chimney text-sm"></i>
-                        <span>Homepage Editor</span>
+                <!-- Nav list -->
+                <nav class="flex-1 space-y-1">
+                    <span class="block px-3 py-1 text-[9px] font-extrabold text-slate-500 uppercase tracking-widest mb-2 whitespace-nowrap">Metrics & Leads</span>
+                    <a href="admin.php" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold hover:bg-slate-800 hover:text-white transition-all <?php echo (basename($_SERVER['PHP_SELF']) === 'admin.php') ? 'bg-brand-500/10 text-brand-400 border border-brand-500/20' : 'text-slate-400'; ?>">
+                        <i class="fa-solid fa-chart-line text-sm"></i> <span class="whitespace-nowrap">Dashboard Overview</span>
                     </a>
-
-                    <a href="settings.php" class="flex items-center gap-3 px-3 py-2.5 text-xs font-bold text-white bg-slate-800 rounded-xl transition-colors whitespace-nowrap">
-                        <i class="fa-solid fa-gears text-brand-400 text-sm"></i>
-                        <span>Website Settings</span>
+                    <a href="enquiries.php" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold hover:bg-slate-800 hover:text-white transition-all <?php echo (basename($_SERVER['PHP_SELF']) === 'enquiries.php') ? 'bg-brand-500/10 text-brand-400 border border-brand-500/20' : 'text-slate-400'; ?>">
+                        <i class="fa-solid fa-envelope-open-text text-sm"></i> <span class="whitespace-nowrap">Customer Enquiries</span>
                     </a>
                     
-                    <a href="../index.php" target="_blank" class="flex items-center gap-3 px-3 py-2.5 text-xs font-bold text-slate-400 hover:text-white hover:bg-slate-800/50 rounded-xl transition-colors whitespace-nowrap">
-                        <i class="fa-solid fa-globe text-sm"></i>
-                        <span>Visit Website</span>
+                    <span class="block px-3 py-1 text-[9px] font-extrabold text-slate-500 uppercase tracking-widest mt-6 mb-2 whitespace-nowrap">Website Settings</span>
+                    <a href="settings.php" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold hover:bg-slate-800 hover:text-white transition-all <?php echo (basename($_SERVER['PHP_SELF']) === 'settings.php') ? 'bg-brand-500/10 text-brand-400 border border-brand-500/20' : 'text-slate-400'; ?>">
+                        <i class="fa-solid fa-sliders text-sm"></i> <span class="whitespace-nowrap">General Configurations</span>
+                    </a>
+                    <a href="homepage.php" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold hover:bg-slate-800 hover:text-white transition-all <?php echo (basename($_SERVER['PHP_SELF']) === 'homepage.php') ? 'bg-brand-500/10 text-brand-400 border border-brand-500/20' : 'text-slate-400'; ?>">
+                        <i class="fa-solid fa-rectangle-ad text-sm"></i> <span class="whitespace-nowrap">Hero Slider Manager</span>
+                    </a>
+                    <a href="services_manager.php" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold hover:bg-slate-800 hover:text-white transition-all <?php echo (basename($_SERVER['PHP_SELF']) === 'services_manager.php') ? 'bg-brand-500/10 text-brand-400 border border-brand-500/20' : 'text-slate-400'; ?>">
+                        <i class="fa-solid fa-folder-open text-sm"></i> <span class="whitespace-nowrap">Services & Catalog</span>
+                    </a>
+                    <a href="about_manager.php" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold hover:bg-slate-800 hover:text-white transition-all <?php echo (basename($_SERVER['PHP_SELF']) === 'about_manager.php') ? 'bg-brand-500/10 text-brand-400 border border-brand-500/20' : 'text-slate-400'; ?>">
+                        <i class="fa-solid fa-circle-info text-sm"></i> <span class="whitespace-nowrap">About Page Editor</span>
+                    </a>
+                    <a href="testimonials_manager.php" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold hover:bg-slate-800 hover:text-white transition-all <?php echo (basename($_SERVER['PHP_SELF']) === 'testimonials_manager.php') ? 'bg-brand-500/10 text-brand-400 border border-brand-500/20' : 'text-slate-400'; ?>">
+                        <i class="fa-solid fa-star text-sm"></i> <span class="whitespace-nowrap">Testimonials</span>
+                    </a>
+                    <a href="blog_manager.php" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold hover:bg-slate-800 hover:text-white transition-all <?php echo (basename($_SERVER['PHP_SELF']) === 'blog_manager.php') ? 'bg-brand-500/10 text-brand-400 border border-brand-500/20' : 'text-slate-400'; ?>">
+                        <i class="fa-solid fa-newspaper text-sm"></i> <span class="whitespace-nowrap">Blog Manager</span>
+                    </a>
+                    <a href="pricing_manager.php" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold hover:bg-slate-800 hover:text-white transition-all <?php echo (basename($_SERVER['PHP_SELF']) === 'pricing_manager.php') ? 'bg-brand-500/10 text-brand-400 border border-brand-500/20' : 'text-slate-400'; ?>">
+                        <i class="fa-solid fa-tags text-sm"></i> <span class="whitespace-nowrap">Pricing Packages</span>
                     </a>
                 </nav>
             </div>
-            
-            <!-- User Status Footer -->
-            <div class="p-4 border-t border-slate-800 flex-shrink-0">
-                <div class="flex items-center gap-3 bg-slate-800/40 p-3 rounded-xl">
-                    <div class="w-8 h-8 rounded-full bg-brand-500 text-white flex items-center justify-center font-bold text-xs">
-                        A
-                    </div>
-                    <div class="overflow-hidden">
-                        <span class="text-[10px] font-extrabold text-white block leading-none truncate"><?php echo htmlspecialchars($adminUsername); ?></span>
-                        <span class="text-[9px] text-slate-550 font-bold block mt-1 uppercase tracking-wider">Role: <?php echo htmlspecialchars($adminRole); ?></span>
-                    </div>
+
+            <!-- Footer Account logout -->
+            <div class="border-t border-slate-800 pt-4 flex items-center justify-between flex-shrink-0">
+                <div class="text-left overflow-hidden">
+                    <span class="text-[10px] font-black text-slate-450 block uppercase">Logged in as</span>
+                    <span class="text-[11px] font-bold text-slate-200 block truncate"><?php echo htmlspecialchars($_SESSION['admin_username'] ?? 'Admin'); ?></span>
                 </div>
+                <a href="logout.php" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-red-500/10 text-slate-400 hover:text-red-400 flex items-center justify-center transition-colors flex-shrink-0" title="Log Out Session">
+                    <i class="fa-solid fa-power-off text-xs"></i>
+                </a>
             </div>
         </aside>
 
@@ -248,7 +321,7 @@ $addresses = json_decode($webSettings['office_addresses'] ?? '[]', true);
                 <?php endif; ?>
 
                 <!-- Settings Form -->
-                <form action="settings.php" method="POST" class="space-y-8">
+                <form action="settings.php" method="POST" enctype="multipart/form-data" class="space-y-8">
                     
                     <!-- Section 1: Logo & Branding -->
                     <div class="bg-white border border-slate-200 p-6 sm:p-8 rounded-3xl space-y-6 text-left">
@@ -258,22 +331,46 @@ $addresses = json_decode($webSettings['office_addresses'] ?? '[]', true);
                         </div>
                         
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                            <!-- Logo URL -->
-                            <div class="space-y-1.5">
-                                <label for="logo_url" class="text-xs font-extrabold uppercase tracking-widest text-slate-500">Corporate Logo File Path / URL</label>
-                                <input type="text" id="logo_url" name="logo_url" required 
-                                       value="<?php echo htmlspecialchars($webSettings['logo_url'] ?? ''); ?>"
-                                       class="w-full text-xs font-semibold px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-brand-500 focus:bg-white focus:outline-none transition-all">
-                                <span class="text-[10px] text-slate-400 font-semibold">Default path: assets/images/logo/Zenvora_Global_Solutions_Logo.png</span>
+                            <!-- Logo URL & Upload -->
+                            <div class="space-y-4">
+                                <div class="space-y-1.5">
+                                    <label for="logo_url" class="text-xs font-extrabold uppercase tracking-widest text-slate-500">Corporate Logo File Path / URL</label>
+                                    <input type="text" id="logo_url" name="logo_url" required 
+                                           value="<?php echo htmlspecialchars($webSettings['logo_url'] ?? ''); ?>"
+                                           class="w-full text-xs font-semibold px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-brand-500 focus:bg-white focus:outline-none transition-all">
+                                </div>
+                                <div class="space-y-1.5">
+                                    <label class="text-xs font-extrabold uppercase tracking-widest text-slate-500">Upload New Logo</label>
+                                    <input type="file" name="logo_file" accept="image/*"
+                                           class="w-full text-xs font-semibold px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:border-brand-500 focus:outline-none transition-all">
+                                </div>
+                                <?php if (!empty($webSettings['logo_url'])): ?>
+                                <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl">
+                                    <span class="text-[9px] font-black uppercase text-slate-400 block mb-2">Current Logo Preview</span>
+                                    <img src="../<?php echo htmlspecialchars($webSettings['logo_url']); ?>" alt="Logo Preview" class="h-12 w-auto object-contain bg-slate-800 p-2 rounded-lg">
+                                </div>
+                                <?php endif; ?>
                             </div>
 
-                            <!-- Favicon URL -->
-                            <div class="space-y-1.5">
-                                <label for="favicon" class="text-xs font-extrabold uppercase tracking-widest text-slate-500">Favicon File Path / URL</label>
-                                <input type="text" id="favicon" name="favicon" required 
-                                       value="<?php echo htmlspecialchars($webSettings['favicon'] ?? ''); ?>"
-                                       class="w-full text-xs font-semibold px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-brand-500 focus:bg-white focus:outline-none transition-all">
-                                <span class="text-[10px] text-slate-400 font-semibold">Icon displayed on browser tabs</span>
+                            <!-- Favicon URL & Upload -->
+                            <div class="space-y-4">
+                                <div class="space-y-1.5">
+                                    <label for="favicon" class="text-xs font-extrabold uppercase tracking-widest text-slate-500">Favicon File Path / URL</label>
+                                    <input type="text" id="favicon" name="favicon" required 
+                                           value="<?php echo htmlspecialchars($webSettings['favicon'] ?? ''); ?>"
+                                           class="w-full text-xs font-semibold px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-brand-500 focus:bg-white focus:outline-none transition-all">
+                                </div>
+                                <div class="space-y-1.5">
+                                    <label class="text-xs font-extrabold uppercase tracking-widest text-slate-500">Upload New Favicon</label>
+                                    <input type="file" name="favicon_file" accept="image/*"
+                                           class="w-full text-xs font-semibold px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:border-brand-500 focus:outline-none transition-all">
+                                </div>
+                                <?php if (!empty($webSettings['favicon'])): ?>
+                                <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl">
+                                    <span class="text-[9px] font-black uppercase text-slate-400 block mb-2">Current Favicon Preview</span>
+                                    <img src="../<?php echo htmlspecialchars($webSettings['favicon']); ?>" alt="Favicon Preview" class="h-8 w-8 object-contain bg-slate-800 p-1 rounded-lg">
+                                </div>
+                                <?php endif; ?>
                             </div>
                         </div>
                     </div>
@@ -316,11 +413,11 @@ $addresses = json_decode($webSettings['office_addresses'] ?? '[]', true);
                         </div>
                     </div>
 
-                    <!-- Section 4: Email, Maps & Timings -->
+                    <!-- Section 4: Email, Primary Contacts, Maps & Timings -->
                     <div class="bg-white border border-slate-200 p-6 sm:p-8 rounded-3xl space-y-6 text-left">
                         <div class="border-b border-slate-150 pb-3 flex items-center gap-2.5">
                             <i class="fa-solid fa-envelope text-brand-500 text-sm"></i>
-                            <h3 class="text-sm font-extrabold text-slate-900 uppercase tracking-wider">General Helplines, Timings & Maps</h3>
+                            <h3 class="text-sm font-extrabold text-slate-900 uppercase tracking-wider">Primary Helplines, Timings & Maps</h3>
                         </div>
 
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -338,6 +435,23 @@ $addresses = json_decode($webSettings['office_addresses'] ?? '[]', true);
                                 <input type="email" id="email_2" name="email_2" required 
                                        value="<?php echo htmlspecialchars($webSettings['email_2'] ?? ''); ?>"
                                        class="w-full text-xs font-semibold px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-brand-500 focus:bg-white focus:outline-none transition-all">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                            <!-- Phone 1 (Primary Helpline) -->
+                            <div class="space-y-1.5">
+                                <label for="phone_1" class="text-xs font-extrabold uppercase tracking-widest text-slate-500">Primary Call Helpline (phone_1)</label>
+                                <input type="text" id="phone_1" name="phone_1" required 
+                                       value="<?php echo htmlspecialchars($webSettings['phone_1'] ?? ''); ?>"
+                                       class="w-full text-xs font-semibold px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-brand-500 focus:bg-white focus:outline-none transition-all">
+                            </div>
+
+                            <!-- Noida Head Office Address -->
+                            <div class="space-y-1.5">
+                                <label for="address_noida" class="text-xs font-extrabold uppercase tracking-widest text-slate-500">Noida Head Office Address (address_noida)</label>
+                                <textarea id="address_noida" name="address_noida" rows="2" required 
+                                          class="w-full text-xs font-semibold px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-brand-500 focus:bg-white focus:outline-none transition-all resize-none"><?php echo htmlspecialchars($webSettings['address_noida'] ?? ''); ?></textarea>
                             </div>
                         </div>
                         
@@ -367,6 +481,128 @@ $addresses = json_decode($webSettings['office_addresses'] ?? '[]', true);
                             </div>
                         </div>
                     </div>
+
+                    <!-- Section 5: Social Media Links -->
+                    <div class="bg-white border border-slate-200 p-6 sm:p-8 rounded-3xl space-y-6 text-left">
+                        <div class="border-b border-slate-150 pb-3 flex items-center gap-2.5">
+                            <i class="fa-solid fa-share-nodes text-brand-500 text-sm"></i>
+                            <h3 class="text-sm font-extrabold text-slate-900 uppercase tracking-wider">Social Media Channels</h3>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                            <!-- Facebook -->
+                            <div class="space-y-1.5">
+                                <label for="social_facebook" class="text-xs font-extrabold uppercase tracking-widest text-slate-500">Facebook URL</label>
+                                <input type="text" id="social_facebook" name="social_facebook" required 
+                                       value="<?php echo htmlspecialchars($webSettings['social_facebook'] ?? '#'); ?>"
+                                       class="w-full text-xs font-semibold px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-brand-500 focus:bg-white focus:outline-none transition-all">
+                            </div>
+
+                            <!-- Twitter -->
+                            <div class="space-y-1.5">
+                                <label for="social_twitter" class="text-xs font-extrabold uppercase tracking-widest text-slate-500">Twitter / X URL</label>
+                                <input type="text" id="social_twitter" name="social_twitter" required 
+                                       value="<?php echo htmlspecialchars($webSettings['social_twitter'] ?? '#'); ?>"
+                                       class="w-full text-xs font-semibold px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-brand-500 focus:bg-white focus:outline-none transition-all">
+                            </div>
+
+                            <!-- LinkedIn -->
+                            <div class="space-y-1.5">
+                                <label for="social_linkedin" class="text-xs font-extrabold uppercase tracking-widest text-slate-500">LinkedIn URL</label>
+                                <input type="text" id="social_linkedin" name="social_linkedin" required 
+                                       value="<?php echo htmlspecialchars($webSettings['social_linkedin'] ?? '#'); ?>"
+                                       class="w-full text-xs font-semibold px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-brand-500 focus:bg-white focus:outline-none transition-all">
+                            </div>
+
+                            <!-- Instagram -->
+                            <div class="space-y-1.5">
+                                <label for="social_instagram" class="text-xs font-extrabold uppercase tracking-widest text-slate-500">Instagram URL</label>
+                                <input type="text" id="social_instagram" name="social_instagram" required 
+                                       value="<?php echo htmlspecialchars($webSettings['social_instagram'] ?? '#'); ?>"
+                                       class="w-full text-xs font-semibold px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-brand-500 focus:bg-white focus:outline-none transition-all">
+                            </div>
+
+                            <!-- YouTube -->
+                            <div class="space-y-1.5">
+                                <label for="social_youtube" class="text-xs font-extrabold uppercase tracking-widest text-slate-500">YouTube URL</label>
+                                <input type="text" id="social_youtube" name="social_youtube" required 
+                                       value="<?php echo htmlspecialchars($webSettings['social_youtube'] ?? '#'); ?>"
+                                       class="w-full text-xs font-semibold px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-brand-500 focus:bg-white focus:outline-none transition-all">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Trust Statistics Metrics -->
+                    <div class="bg-white border border-slate-200 rounded-3xl p-6 md:p-8 space-y-6">
+                        <div class="flex items-center gap-2 border-b border-slate-100 pb-3">
+                            <i class="fa-solid fa-chart-simple text-brand-500 text-sm"></i>
+                            <h3 class="text-sm font-extrabold text-slate-900 uppercase tracking-wider">Dynamic Trust Statistics</h3>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- Operations count / Label -->
+                            <div class="space-y-4 p-4 border border-slate-200/60 rounded-xl bg-slate-50/40">
+                                <h4 class="text-[10px] font-black uppercase text-slate-900 tracking-wider"><i class="fa-solid fa-chart-simple text-brand-500 mr-1.5"></i> Metric 1: Scale of Operations</h4>
+                                <div class="grid grid-cols-3 gap-4">
+                                    <div class="col-span-1 space-y-1.5">
+                                        <label class="text-[9px] font-extrabold uppercase tracking-widest text-slate-500">Value</label>
+                                        <input type="text" name="stat_ops_count" value="<?php echo htmlspecialchars($webSettings['stat_ops_count'] ?? '1,200+'); ?>" required class="w-full text-xs font-semibold px-4 py-2 border border-slate-200 rounded-lg">
+                                    </div>
+                                    <div class="col-span-2 space-y-1.5">
+                                        <label class="text-[9px] font-extrabold uppercase tracking-widest text-slate-500">Description Label</label>
+                                        <input type="text" name="stat_ops_label" value="<?php echo htmlspecialchars($webSettings['stat_ops_label'] ?? ''); ?>" required class="w-full text-xs font-semibold px-4 py-2 border border-slate-200 rounded-lg">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Accuracy count / Label -->
+                            <div class="space-y-4 p-4 border border-slate-200/60 rounded-xl bg-slate-50/40">
+                                <h4 class="text-[10px] font-black uppercase text-slate-900 tracking-wider"><i class="fa-solid fa-circle-check text-brand-500 mr-1.5"></i> Metric 2: Accuracy SLA</h4>
+                                <div class="grid grid-cols-3 gap-4">
+                                    <div class="col-span-1 space-y-1.5">
+                                        <label class="text-[9px] font-extrabold uppercase tracking-widest text-slate-500">Value</label>
+                                        <input type="text" name="stat_accuracy_count" value="<?php echo htmlspecialchars($webSettings['stat_accuracy_count'] ?? '99.8%'); ?>" required class="w-full text-xs font-semibold px-4 py-2 border border-slate-200 rounded-lg">
+                                    </div>
+                                    <div class="col-span-2 space-y-1.5">
+                                        <label class="text-[9px] font-extrabold uppercase tracking-widest text-slate-500">Description Label</label>
+                                        <input type="text" name="stat_accuracy_label" value="<?php echo htmlspecialchars($webSettings['stat_accuracy_label'] ?? ''); ?>" required class="w-full text-xs font-semibold px-4 py-2 border border-slate-200 rounded-lg">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Panel count / Label -->
+                            <div class="space-y-4 p-4 border border-slate-200/60 rounded-xl bg-slate-50/40">
+                                <h4 class="text-[10px] font-black uppercase text-slate-900 tracking-wider"><i class="fa-solid fa-user-tie text-brand-500 mr-1.5"></i> Metric 3: Expert Panel Size</h4>
+                                <div class="grid grid-cols-3 gap-4">
+                                    <div class="col-span-1 space-y-1.5">
+                                        <label class="text-[9px] font-extrabold uppercase tracking-widest text-slate-500">Value</label>
+                                        <input type="text" name="stat_panel_count" value="<?php echo htmlspecialchars($webSettings['stat_panel_count'] ?? '45+'); ?>" required class="w-full text-xs font-semibold px-4 py-2 border border-slate-200 rounded-lg">
+                                    </div>
+                                    <div class="col-span-2 space-y-1.5">
+                                        <label class="text-[9px] font-extrabold uppercase tracking-widest text-slate-500">Description Label</label>
+                                        <input type="text" name="stat_panel_label" value="<?php echo htmlspecialchars($webSettings['stat_panel_label'] ?? ''); ?>" required class="w-full text-xs font-semibold px-4 py-2 border border-slate-200 rounded-lg">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Speed count / Label -->
+                            <div class="space-y-4 p-4 border border-slate-200/60 rounded-xl bg-slate-50/40">
+                                <h4 class="text-[10px] font-black uppercase text-slate-900 tracking-wider"><i class="fa-solid fa-bolt text-brand-500 mr-1.5"></i> Metric 4: Turnaround Speed</h4>
+                                <div class="grid grid-cols-3 gap-4">
+                                    <div class="col-span-1 space-y-1.5">
+                                        <label class="text-[9px] font-extrabold uppercase tracking-widest text-slate-500">Value</label>
+                                        <input type="text" name="stat_speed_count" value="<?php echo htmlspecialchars($webSettings['stat_speed_count'] ?? '24 Hours'); ?>" required class="w-full text-xs font-semibold px-4 py-2 border border-slate-200 rounded-lg">
+                                    </div>
+                                    <div class="col-span-2 space-y-1.5">
+                                        <label class="text-[9px] font-extrabold uppercase tracking-widest text-slate-500">Description Label</label>
+                                        <input type="text" name="stat_speed_label" value="<?php echo htmlspecialchars($webSettings['stat_speed_label'] ?? ''); ?>" required class="w-full text-xs font-semibold px-4 py-2 border border-slate-200 rounded-lg">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
 
                     <!-- Submit Actions -->
                     <div class="flex items-center justify-end pt-2">
@@ -526,6 +762,7 @@ $addresses = json_decode($webSettings['office_addresses'] ?? '[]', true);
                 row.remove();
             }
         }
+
     </script>
 
 </body>

@@ -7,6 +7,7 @@ require_once __DIR__ . '/settings_helper.php';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Zenvora Global Solutions | Premium Legal, Tax & Compliance Partner</title>
+    <link rel="icon" type="image/png" href="<?php echo htmlspecialchars(getWebSetting('favicon')); ?>">
     
     <!-- SEO Meta Tags -->
     <meta name="description" content="Zenvora Global Solutions is your premier partner for business setup, company registration, legal compliance, accounting, and growth services. Clean, modern, and compliant.">

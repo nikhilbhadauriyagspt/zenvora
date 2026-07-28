@@ -4,6 +4,7 @@
  */
 session_start();
 require_once '../components/db_connect.php';
+require_once '../components/settings_helper.php';
 
 // If user is already logged in, redirect straight to admin panel
 if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true) {
@@ -69,7 +70,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <!-- Logo Icon in Center -->
         <div class="text-center space-y-4">
             <a href="../index.php" class="inline-block">
-                <img class="h-14 w-auto object-contain mx-auto" src="../assets/images/logo/Zenvora_Global_Solutions_Logo.png" alt="Zenvora Logo">
+                <img class="h-14 w-auto object-contain mx-auto" src="../<?php echo htmlspecialchars(getWebSetting('logo_url')); ?>" alt="Zenvora Logo">
             </a>
             <div class="space-y-1">
                 <h1 class="text-xl font-black text-slate-900 tracking-tight">Admin Console</h1>

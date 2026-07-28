@@ -1,4 +1,55 @@
-<!-- Zenvora Premium Pricing Section (Light Theme, 3-Tier Spotlight Grid, No Shadows) -->
+<?php
+/**
+ * Zenvora Premium Pricing Section - Dynamic Slider/Carousel Component
+ * Loads pricing tiers dynamically from the MySQL database with mobile carousel fallback.
+ */
+
+$db_packages = [];
+if (isset($pdo) && $pdo !== null) {
+    try {
+        $db_packages = $pdo->query("SELECT * FROM pricing_packages WHERE status = 'Active' ORDER BY sort_order ASC, id ASC LIMIT 6")->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        $db_packages = [];
+    }
+}
+
+// Fallback pricing packages if database query is empty
+if (empty($db_packages)) {
+    $db_packages = [
+        [
+            'title' => 'Startup Registry',
+            'subtitle' => 'For Early Stage Founders',
+            'price' => '₹4,999',
+            'tax_note' => '+ Gov Challan',
+            'description' => 'Complete legal setup to get your corporate identity registered with MCA and tax hubs in days.',
+            'deliverables' => "2 Director DINs & DSC Digital Keys\nMCA Name Approval Filing (RUN)\nMoA / AoA Drafting & Filing\nPAN & TAN Cards Allocation\nZero-Balance Current Bank Account",
+            'badge' => '',
+            'sort_order' => 1
+        ],
+        [
+            'title' => 'Scale & Compliancy',
+            'subtitle' => 'For Funded & Scaling Startups',
+            'price' => '₹9,999',
+            'tax_note' => '+ Gov Challan',
+            'description' => 'Complete corporate incorporation combined with operational tax registrations and corporate advisor check-ins.',
+            'deliverables' => "Everything in Startup Registry\nMSME (Udyam) Registration\nGST Registration & HSN Codes Setup\n1-Year Compliance Calendar Consult\nFirst Board Resolution Draft",
+            'badge' => 'Most Popular',
+            'sort_order' => 2
+        ],
+        [
+            'title' => 'Enterprise Suite',
+            'subtitle' => 'For Subsidiaries & MNCs',
+            'price' => '₹24,999',
+            'tax_note' => 'All-Inclusive Fee',
+            'description' => 'End-to-end setup coordination for foreign subsidiaries, joint ventures, and custom capital structures.',
+            'deliverables' => "Foreign Direct Investment (FDI) reporting\nRBI FEMA compliance checks\nCustom drafted Shareholder agreements\nDedicated Corporate Secretary support\nRegistered Office Address setup (1 Year)",
+            'badge' => '',
+            'sort_order' => 3
+        ]
+    ];
+}
+?>
+<!-- Zenvora Premium Pricing Section (Light Theme, 3-Tier Spotlight Grid, Dynamic Carousel Slider) -->
 <section id="pricing" class="relative py-24 bg-white border-b border-slate-100 overflow-hidden">
     <!-- Subtle Background Decorators -->
     <div class="absolute inset-0 opacity-[0.02] pointer-events-none bg-[radial-gradient(#bc8731_1px,transparent_1px)] [background-size:24px_24px]"></div>
@@ -18,167 +69,152 @@
             </p>
         </div>
 
-        <!-- 3-Tier Spotlight Card Grid -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch">
+        <!-- Swipeable Pricing Slider Wrapper (Grid on desktop, Carousel on mobile/tablet) -->
+        <div class="relative w-full overflow-hidden" id="pricing-slider-container">
             
-            <!-- Tier 1: Startup Pack -->
-            <div class="bg-slate-50/50 rounded-3xl p-8 border border-slate-200/60 hover:border-slate-300 transition-all duration-300 flex flex-col justify-between relative">
-                <div>
-                    <!-- Package Name & Target -->
-                    <div class="space-y-1">
-                        <h3 class="text-base font-extrabold text-slate-900">Startup Registry</h3>
-                        <p class="text-[11px] text-slate-400 font-semibold uppercase tracking-wider">For Early Stage Founders</p>
-                    </div>
-
-                    <!-- Price -->
-                    <div class="mt-6 flex items-baseline text-slate-900 gap-1">
-                        <span class="text-3xl font-black">₹4,999</span>
-                        <span class="text-slate-450 text-[10px] font-semibold tracking-wider uppercase">+ Gov Challan</span>
-                    </div>
-
-                    <p class="text-xs text-slate-550 mt-4 leading-relaxed font-medium">
-                        Complete legal setup to get your corporate identity registered with MCA and tax hubs in days.
-                    </p>
-
-                    <!-- Deliverables Checklist -->
-                    <ul class="mt-8 space-y-4 text-xs font-semibold text-slate-700">
-                        <li class="flex items-center gap-3">
-                            <span class="w-5 h-5 rounded-full bg-brand-500/10 text-brand-500 flex items-center justify-center text-[10px]"><i class="fa-solid fa-check"></i></span>
-                            2 Director DINs & DSC Digital Keys
-                        </li>
-                        <li class="flex items-center gap-3">
-                            <span class="w-5 h-5 rounded-full bg-brand-500/10 text-brand-500 flex items-center justify-center text-[10px]"><i class="fa-solid fa-check"></i></span>
-                            MCA Name Approval Filing (RUN)
-                        </li>
-                        <li class="flex items-center gap-3">
-                            <span class="w-5 h-5 rounded-full bg-brand-500/10 text-brand-500 flex items-center justify-center text-[10px]"><i class="fa-solid fa-check"></i></span>
-                            MoA / AoA Drafting & Filing
-                        </li>
-                        <li class="flex items-center gap-3">
-                            <span class="w-5 h-5 rounded-full bg-brand-500/10 text-brand-500 flex items-center justify-center text-[10px]"><i class="fa-solid fa-check"></i></span>
-                            PAN & TAN Cards Allocation
-                        </li>
-                        <li class="flex items-center gap-3">
-                            <span class="w-5 h-5 rounded-full bg-brand-500/10 text-brand-500 flex items-center justify-center text-[10px]"><i class="fa-solid fa-check"></i></span>
-                            Zero-Balance Current Bank Account
-                        </li>
-                    </ul>
-                </div>
-
-                <div class="mt-8 pt-6 border-t border-slate-200/50">
-                    <a href="#contact" class="block w-full text-center py-3.5 rounded-xl text-xs font-black text-slate-900 bg-white hover:bg-slate-100 border border-slate-250 transition-colors">
-                        Select Startup Pack
-                    </a>
-                </div>
-            </div>
-
-            <!-- Tier 2: Premium Growth Pack (Featured Card) -->
-            <div class="bg-slate-900 text-white rounded-3xl p-8 border-2 border-brand-500/40 shadow-xl flex flex-col justify-between relative transform lg:-translate-y-2 z-10">
-                <!-- Most Popular Tag -->
-                <span class="absolute top-0 right-8 -translate-y-1/2 px-3 py-1 bg-brand-500 text-white text-[9px] font-black uppercase tracking-widest rounded-full">
-                    Most Popular
-                </span>
+            <!-- Sliding Track -->
+            <div id="pricing-track" class="flex md:grid md:grid-cols-3 gap-8 transition-transform duration-500 ease-in-out md:transform-none select-none" style="transform: translateX(0%);">
                 
-                <div>
-                    <!-- Package Name & Target -->
-                    <div class="space-y-1">
-                        <h3 class="text-base font-extrabold text-white">Scale & Compliancy</h3>
-                        <p class="text-[11px] text-brand-400 font-semibold uppercase tracking-wider">For Funded & Scaling Startups</p>
+                <?php foreach ($db_packages as $idx => $pkg): 
+                    $isFeatured = ($pkg['badge'] === 'Most Popular');
+                    $lines = explode("\n", str_replace("\r", "", $pkg['deliverables']));
+                ?>
+                <!-- Pricing Card slide -->
+                <div class="w-full flex-shrink-0 md:w-auto md:flex-shrink-1 p-1">
+                    <div class="h-full rounded-3xl p-8 border flex flex-col justify-between relative <?php echo $isFeatured ? 'bg-slate-900 text-white border-2 border-brand-500/40 shadow-xl transform md:-translate-y-2 z-10' : 'bg-slate-50/50 text-slate-650 border-slate-200/60 hover:border-slate-350 transition-all duration-300'; ?>">
+                        
+                        <?php if ($pkg['badge']): ?>
+                        <!-- Most Popular Tag -->
+                        <span class="absolute top-0 right-8 -translate-y-1/2 px-3 py-1 bg-brand-500 text-white text-[9px] font-black uppercase tracking-widest rounded-full z-20">
+                            <?php echo htmlspecialchars($pkg['badge']); ?>
+                        </span>
+                        <?php endif; ?>
+                        
+                        <div class="space-y-6">
+                            <!-- Package Name & Target -->
+                            <div class="space-y-1 text-left">
+                                <h3 class="text-base font-extrabold <?php echo $isFeatured ? 'text-white' : 'text-slate-900'; ?>"><?php echo htmlspecialchars($pkg['title']); ?></h3>
+                                <p class="text-[11px] <?php echo $isFeatured ? 'text-brand-400' : 'text-slate-400'; ?> font-semibold uppercase tracking-wider"><?php echo htmlspecialchars($pkg['subtitle']); ?></p>
+                            </div>
+
+                            <!-- Price -->
+                            <div class="mt-6 flex items-baseline <?php echo $isFeatured ? 'text-white' : 'text-slate-900'; ?> gap-1 text-left">
+                                <span class="text-3xl font-black <?php echo $isFeatured ? 'text-brand-400' : 'text-slate-900'; ?>"><?php echo htmlspecialchars($pkg['price']); ?></span>
+                                <span class="<?php echo $isFeatured ? 'text-slate-450' : 'text-slate-450'; ?> text-[10px] font-semibold tracking-wider uppercase"><?php echo htmlspecialchars($pkg['tax_note']); ?></span>
+                            </div>
+
+                            <p class="text-xs <?php echo $isFeatured ? 'text-slate-400' : 'text-slate-550'; ?> mt-4 leading-relaxed font-medium text-left">
+                                <?php echo htmlspecialchars($pkg['description']); ?>
+                            </p>
+
+                            <!-- Deliverables Checklist -->
+                            <ul class="mt-8 space-y-4 text-xs font-semibold <?php echo $isFeatured ? 'text-slate-200' : 'text-slate-700'; ?> text-left">
+                                <?php foreach ($lines as $ln): 
+                                    if (trim($ln) === '') continue;
+                                ?>
+                                <li class="flex items-start gap-3">
+                                    <span class="w-5 h-5 rounded-full <?php echo $isFeatured ? 'bg-brand-500/20 text-brand-400' : 'bg-brand-500/10 text-brand-500'; ?> flex items-center justify-center text-[10px] mt-0.5 flex-shrink-0"><i class="fa-solid fa-check"></i></span>
+                                    <span><?php echo htmlspecialchars($ln); ?></span>
+                                </li>
+                                <?php endforeach; ?>
+                            </ul>
+                        </div>
+
+                        <div class="mt-8 pt-6 border-t <?php echo $isFeatured ? 'border-slate-800' : 'border-slate-200/50'; ?>">
+                            <a href="#contact" class="block w-full text-center py-3.5 rounded-xl text-xs font-black <?php echo $isFeatured ? 'text-slate-950 bg-brand-500 hover:bg-brand-400' : 'text-slate-900 bg-white hover:bg-slate-100 border border-slate-250'; ?> transition-all duration-200 hover:-translate-y-0.5">
+                                Select <?php echo htmlspecialchars($pkg['title']); ?>
+                            </a>
+                        </div>
                     </div>
-
-                    <!-- Price -->
-                    <div class="mt-6 flex items-baseline text-white gap-1">
-                        <span class="text-3xl font-black text-brand-400">₹9,999</span>
-                        <span class="text-slate-400 text-[10px] font-semibold tracking-wider uppercase">+ Gov Challan</span>
-                    </div>
-
-                    <p class="text-xs text-slate-400 mt-4 leading-relaxed font-medium">
-                        Complete corporate incorporation combined with operational tax registrations and corporate advisor check-ins.
-                    </p>
-
-                    <!-- Deliverables Checklist -->
-                    <ul class="mt-8 space-y-4 text-xs font-semibold text-slate-200">
-                        <li class="flex items-center gap-3">
-                            <span class="w-5 h-5 rounded-full bg-brand-500/20 text-brand-400 flex items-center justify-center text-[10px]"><i class="fa-solid fa-check"></i></span>
-                            Everything included in Startup Pack
-                        </li>
-                        <li class="flex items-center gap-3">
-                            <span class="w-5 h-5 rounded-full bg-brand-500/20 text-brand-400 flex items-center justify-center text-[10px]"><i class="fa-solid fa-check"></i></span>
-                            GST Registration File Setup
-                        </li>
-                        <li class="flex items-center gap-3">
-                            <span class="w-5 h-5 rounded-full bg-brand-500/20 text-brand-400 flex items-center justify-center text-[10px]"><i class="fa-solid fa-check"></i></span>
-                            MSME Udyam Registry Certificate
-                        </li>
-                        <li class="flex items-center gap-3">
-                            <span class="w-5 h-5 rounded-full bg-brand-500/20 text-brand-400 flex items-center justify-center text-[10px]"><i class="fa-solid fa-check"></i></span>
-                            Trademark Application Filing (1 Class)
-                        </li>
-                        <li class="flex items-center gap-3">
-                            <span class="w-5 h-5 rounded-full bg-brand-500/20 text-brand-400 flex items-center justify-center text-[10px]"><i class="fa-solid fa-check"></i></span>
-                            1-Hour Legal Compliance Call with CA
-                        </li>
-                    </ul>
                 </div>
+                <?php endforeach; ?>
 
-                <div class="mt-8 pt-6 border-t border-slate-800">
-                    <a href="#contact" class="block w-full text-center py-3.5 rounded-xl text-xs font-black text-slate-900 bg-white hover:bg-slate-100 transition-colors">
-                        Select Growth Pack
-                    </a>
-                </div>
             </div>
-
-            <!-- Tier 3: Enterprise Advisory Pack -->
-            <div class="bg-slate-50/50 rounded-3xl p-8 border border-slate-200/60 hover:border-slate-300 transition-all duration-300 flex flex-col justify-between relative">
-                <div>
-                    <!-- Package Name & Target -->
-                    <div class="space-y-1">
-                        <h3 class="text-base font-extrabold text-slate-900">Virtual CFO Office</h3>
-                        <p class="text-[11px] text-slate-400 font-semibold uppercase tracking-wider">For Mature & Active Companies</p>
-                    </div>
-
-                    <!-- Price -->
-                    <div class="mt-6 flex items-baseline text-slate-900 gap-1">
-                        <span class="text-3xl font-black">₹19,999</span>
-                        <span class="text-slate-450 text-[10px] font-semibold tracking-wider uppercase">/ Month</span>
-                    </div>
-
-                    <p class="text-xs text-slate-550 mt-4 leading-relaxed font-medium">
-                        Outsource your monthly bookkeeping, accounting ledgers, ROC compliance schedules, and tax filing runs to our CA office.
-                    </p>
-
-                    <!-- Deliverables Checklist -->
-                    <ul class="mt-8 space-y-4 text-xs font-semibold text-slate-700">
-                        <li class="flex items-center gap-3">
-                            <span class="w-5 h-5 rounded-full bg-brand-500/10 text-brand-500 flex items-center justify-center text-[10px]"><i class="fa-solid fa-check"></i></span>
-                            Monthly Ledger Bookkeeping on Tally/Zoho
-                        </li>
-                        <li class="flex items-center gap-3">
-                            <span class="w-5 h-5 rounded-full bg-brand-500/10 text-brand-500 flex items-center justify-center text-[10px]"><i class="fa-solid fa-check"></i></span>
-                            Monthly GST Return Filings (GSTR-1 & 3B)
-                        </li>
-                        <li class="flex items-center gap-3">
-                            <span class="w-5 h-5 rounded-full bg-brand-500/10 text-brand-500 flex items-center justify-center text-[10px]"><i class="fa-solid fa-check"></i></span>
-                            TDS Filings & Quarterly Computations
-                        </li>
-                        <li class="flex items-center gap-3">
-                            <span class="w-5 h-5 rounded-full bg-brand-500/10 text-brand-500 flex items-center justify-center text-[10px]"><i class="fa-solid fa-check"></i></span>
-                            Annual ROC Filing & Financials Audits
-                        </li>
-                        <li class="flex items-center gap-3">
-                            <span class="w-5 h-5 rounded-full bg-brand-500/10 text-brand-500 flex items-center justify-center text-[10px]"><i class="fa-solid fa-check"></i></span>
-                            Dedicated CA Advisory Group Support
-                        </li>
-                    </ul>
-                </div>
-
-                <div class="mt-8 pt-6 border-t border-slate-200/50">
-                    <a href="#contact" class="block w-full text-center py-3.5 rounded-xl text-xs font-black text-slate-900 bg-white hover:bg-slate-100 border border-slate-250 transition-colors">
-                        Select CFO Pack
-                    </a>
-                </div>
-            </div>
-
         </div>
+
+        <!-- Slider controls for mobile/tablet (Hidden on desktop) -->
+        <div class="flex items-center justify-center gap-6 mt-8 md:hidden">
+            <!-- Left Arrow -->
+            <button id="price-prev-btn" class="w-10 h-10 rounded-full border border-slate-250 bg-white hover:bg-slate-50 text-slate-600 flex items-center justify-center transition-colors">
+                <i class="fa-solid fa-chevron-left text-xs"></i>
+            </button>
+            
+            <!-- Dots Indicators -->
+            <div class="flex gap-2" id="price-dots-container">
+                <?php foreach ($db_packages as $idx => $pkg): ?>
+                <button class="<?php echo $idx === 0 ? 'w-6 h-1.5 bg-brand-500' : 'w-1.5 h-1.5 bg-slate-350'; ?> rounded-full transition-all duration-300" data-index="<?php echo $idx; ?>" aria-label="Go to pricing slide <?php echo $idx + 1; ?>"></button>
+                <?php endforeach; ?>
+            </div>
+
+            <!-- Right Arrow -->
+            <button id="price-next-btn" class="w-10 h-10 rounded-full border border-slate-250 bg-white hover:bg-slate-50 text-slate-650 flex items-center justify-center transition-colors">
+                <i class="fa-solid fa-chevron-right text-xs"></i>
+            </button>
+        </div>
+
     </div>
 </section>
+
+<!-- Pricing Slider JS Handler -->
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const track = document.getElementById('pricing-track');
+        const dots = document.querySelectorAll('#price-dots-container button');
+        const prevBtn = document.getElementById('price-prev-btn');
+        const nextBtn = document.getElementById('price-next-btn');
+
+        if (!track || dots.length === 0) return;
+
+        let currentIndex = 0;
+        const totalSlides = dots.length;
+
+        function updateSlider(index) {
+            if (window.innerWidth >= 768) {
+                track.style.transform = '';
+                return; 
+            }
+
+            currentIndex = index;
+            track.style.transform = `translateX(-${currentIndex * 100}%)`;
+
+            // Update indicators
+            dots.forEach((dot, idx) => {
+                if (idx === currentIndex) {
+                    dot.className = 'w-6 h-1.5 bg-brand-500 rounded-full transition-all duration-300';
+                } else {
+                    dot.className = 'w-1.5 h-1.5 bg-slate-300 rounded-full transition-all duration-300';
+                }
+            });
+        }
+
+        if (prevBtn && nextBtn) {
+            prevBtn.addEventListener('click', () => {
+                let nextIdx = currentIndex - 1;
+                if (nextIdx < 0) nextIdx = totalSlides - 1;
+                updateSlider(nextIdx);
+            });
+
+            nextBtn.addEventListener('click', () => {
+                let nextIdx = currentIndex + 1;
+                if (nextIdx >= totalSlides) nextIdx = 0;
+                updateSlider(nextIdx);
+            });
+        }
+
+        dots.forEach(dot => {
+            dot.addEventListener('click', () => {
+                const idx = parseInt(dot.getAttribute('data-index'), 10);
+                updateSlider(idx);
+            });
+        });
+
+        // Reset slide transform on resize if switching to desktop
+        window.addEventListener('resize', () => {
+            if (window.innerWidth >= 768) {
+                track.style.transform = '';
+            } else {
+                updateSlider(currentIndex);
+            }
+        });
+    });
+</script>

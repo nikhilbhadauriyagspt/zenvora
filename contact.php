@@ -14,13 +14,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = trim($_POST['name'] ?? '');
     $phone = trim($_POST['phone'] ?? '');
     $email = trim($_POST['email'] ?? '');
-    $service = trim($_POST['service'] ?? '');
-    $org_size = trim($_POST['org_size'] ?? '');
-    $timeline = trim($_POST['timeline'] ?? '');
+    $service = trim($_POST['service'] ?? 'General Inquiry');
+    $org_size = trim($_POST['org_size'] ?? '1');
+    $timeline = trim($_POST['timeline'] ?? 'immediately');
     $message = trim($_POST['message'] ?? '');
+    $source_page = trim($_POST['source_page'] ?? 'Contact Page');
     
-    if (empty($name) || empty($phone) || empty($email) || empty($service) || empty($org_size) || empty($timeline)) {
-        $errorMsg = 'Please fill out all required fields.';
+    // Map service category slug to a premium, human-readable name
+    $serviceMapping = [
+        'startup' => 'Business Startup Registration',
+        'tax' => 'GST & Tax Compliances',
+        'licenses' => 'Operational Licenses',
+        'certifications' => 'ISO & Trademarking',
+        'ngo' => 'NGO & Trust setup'
+    ];
+    if (isset($serviceMapping[$service])) {
+        $service = $serviceMapping[$service];
+    }
+    
+    // Append the source page to the service name
+    $finalService = $service . ' (' . $source_page . ')';
+    
+    if (empty($name) || empty($phone) || empty($email)) {
+        $errorMsg = 'Please fill out all required fields (Name, Phone, and Email).';
     } else {
         if ($pdo !== null) {
             try {
@@ -29,7 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     ':name' => $name,
                     ':phone' => $phone,
                     ':email' => $email,
-                    ':service' => $service,
+                    ':service' => $finalService,
                     ':org_size' => $org_size,
                     ':timeline' => $timeline,
                     ':message' => $message
@@ -289,6 +305,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <textarea id="form-message" name="message" rows="4" placeholder="Briefly specify what business registrations or licensing you are looking for..." 
                                           class="w-full text-sm font-semibold px-4 py-3 bg-white border border-slate-200 rounded-xl focus:border-brand-500 focus:outline-none transition-colors resize-none"></textarea>
                             </div>
+
+                            <input type="hidden" name="source_page" value="Contact Page">
 
                             <!-- Submit Button -->
                             <button type="submit" class="w-full text-center py-4 rounded-full text-sm font-bold text-white accent-gradient hover:opacity-95 transition-all duration-300">
