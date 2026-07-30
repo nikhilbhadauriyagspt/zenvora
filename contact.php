@@ -50,6 +50,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     ':timeline' => $timeline,
                     ':message' => $message
                 ]);
+                
+                // Dispatch SMTP email alert
+                require_once __DIR__ . '/components/mail_helper.php';
+                @send_lead_notification($name, $phone, $email, $finalService, $org_size, $timeline, $message);
+                
                 $successMsg = 'Thank you! Your advisory request has been successfully logged. A CA will call you back in under 15 minutes.';
             } catch (PDOException $e) {
                 $errorMsg = 'Failed to submit enquiry: ' . $e->getMessage();
@@ -74,7 +79,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <?php include_once 'components/head.php'; ?>
 </head>
 
-<body class="bg-white font-sans text-slate-600 antialiased selection:bg-brand-500 selection:text-white">
+<body class="subpage-theme bg-white font-sans text-slate-600 antialiased selection:bg-brand-500 selection:text-white">
 
     <!-- Global Header Navigation -->
     <?php include_once 'components/header.php'; ?>

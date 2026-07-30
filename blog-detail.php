@@ -27,6 +27,12 @@ if (!$blog) {
     header('Location: blog.php');
     exit;
 }
+
+// Define custom SEO metadata variables for head.php inclusion (Automatic generation from blog details)
+$custom_page_title = htmlspecialchars($blog['title']) . ' | Zenvora Blog';
+$custom_page_desc = htmlspecialchars($blog['excerpt']);
+$custom_page_keys = htmlspecialchars($blog['category']) . ', Blog, Zenvora';
+$custom_page_canonical = 'http://localhost/commanpro/blog-detail.php?id=' . (int)$blog['id'];
 ?>
 <!DOCTYPE html>
 <html lang="en" class="scroll-smooth">
@@ -34,14 +40,12 @@ if (!$blog) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo htmlspecialchars($blog['title']); ?> | Zenvora Blog</title>
-    <meta name="description" content="<?php echo htmlspecialchars($blog['excerpt']); ?>">
     
     <!-- Load Head dependencies (Tailwind CDN, Fonts, Font Awesome) -->
     <?php include_once 'components/head.php'; ?>
 </head>
 
-<body class="bg-white font-sans text-slate-600 antialiased selection:bg-brand-500 selection:text-white">
+<body class="subpage-theme bg-white font-sans text-slate-600 antialiased selection:bg-brand-500 selection:text-white">
 
     <!-- Global Header Navigation -->
     <?php include_once 'components/header.php'; ?>

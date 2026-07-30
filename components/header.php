@@ -82,37 +82,37 @@ if (empty($nav_categories)) {
     unset($cat);
 }
 ?>
-<!-- Top Contact & Social Bar (Default state: clean dark slate style) -->
-<div class="bg-slate-900 text-slate-300 py-2.5 text-xs border-b border-slate-800 relative z-50">
+<!-- Top Contact & Social Bar (Default state: premium gold brand style with cool white text) -->
+<div class="accent-gradient text-white py-2 text-xs border-b border-brand-600 relative z-50 shadow-sm">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-2 text-center sm:text-left">
         <!-- Contact details -->
-        <div class="flex flex-wrap items-center justify-center gap-x-6 gap-y-1 font-medium">
+        <div class="flex flex-wrap items-center justify-center gap-x-6 gap-y-1 font-bold">
             <?php
             $topPhones = getWebPhones();
             $firstPhone = !empty($topPhones) ? reset($topPhones) : ['label' => 'Hotline', 'value' => '+91 98765 43210'];
             ?>
-            <a href="tel:<?php echo htmlspecialchars($firstPhone['value']); ?>" class="hover:text-brand-400 transition-colors flex items-center gap-1.5 text-slate-300">
-                <i class="fa-solid fa-phone text-brand-500 text-[11px]"></i>
+            <a href="tel:<?php echo htmlspecialchars($firstPhone['value']); ?>" class="hover:text-slate-950 transition-colors flex items-center gap-1.5 text-white drop-shadow-sm">
+                <i class="fa-solid fa-phone text-white text-[11px]"></i>
                 <?php echo htmlspecialchars($firstPhone['value']); ?>
             </a>
-            <a href="mailto:<?php echo getWebSetting('email_1'); ?>" class="hover:text-brand-400 transition-colors flex items-center gap-1.5 text-slate-300">
-                <i class="fa-solid fa-envelope text-brand-500 text-[11px]"></i>
+            <a href="mailto:<?php echo getWebSetting('email_1'); ?>" class="hover:text-slate-950 transition-colors flex items-center gap-1.5 text-white drop-shadow-sm">
+                <i class="fa-solid fa-envelope text-white text-[11px]"></i>
                 <?php echo getWebSetting('email_1'); ?>
             </a>
         </div>
         <!-- Right side timing & socials -->
         <div class="flex items-center gap-5">
-            <span class="hidden md:inline-flex items-center gap-1.5 text-slate-400">
-                <i class="fa-solid fa-clock text-brand-500 text-[11px]"></i>
+            <span class="hidden md:inline-flex items-center gap-1.5 text-white/90 font-bold drop-shadow-sm">
+                <i class="fa-solid fa-clock text-white/90 text-[11px]"></i>
                 <?php echo getWebSetting('working_hours'); ?>
             </span>
-            <div class="flex items-center gap-3.5 text-slate-400">
-                <a href="<?php echo htmlspecialchars(getWebSetting('social_facebook')); ?>" target="_blank" class="hover:text-brand-400 transition-colors"><i class="fa-brands fa-facebook-f"></i></a>
-                <a href="<?php echo htmlspecialchars(getWebSetting('social_twitter')); ?>" target="_blank" class="hover:text-brand-400 transition-colors"><i class="fa-brands fa-twitter"></i></a>
-                <a href="<?php echo htmlspecialchars(getWebSetting('social_linkedin')); ?>" target="_blank" class="hover:text-brand-400 transition-colors"><i class="fa-brands fa-linkedin-in"></i></a>
-                <a href="<?php echo htmlspecialchars(getWebSetting('social_instagram')); ?>" target="_blank" class="hover:text-brand-400 transition-colors"><i class="fa-brands fa-instagram"></i></a>
+            <div class="flex items-center gap-3.5 text-white drop-shadow-sm">
+                <a href="<?php echo htmlspecialchars(getWebSetting('social_facebook')); ?>" target="_blank" class="hover:text-slate-950 transition-colors"><i class="fa-brands fa-facebook-f"></i></a>
+                <a href="<?php echo htmlspecialchars(getWebSetting('social_twitter')); ?>" target="_blank" class="hover:text-slate-950 transition-colors"><i class="fa-brands fa-twitter"></i></a>
+                <a href="<?php echo htmlspecialchars(getWebSetting('social_linkedin')); ?>" target="_blank" class="hover:text-slate-950 transition-colors"><i class="fa-brands fa-linkedin-in"></i></a>
+                <a href="<?php echo htmlspecialchars(getWebSetting('social_instagram')); ?>" target="_blank" class="hover:text-slate-950 transition-colors"><i class="fa-brands fa-instagram"></i></a>
                 <?php if (getWebSetting('social_youtube') !== '#' && getWebSetting('social_youtube') !== ''): ?>
-                    <a href="<?php echo htmlspecialchars(getWebSetting('social_youtube')); ?>" target="_blank" class="hover:text-brand-400 transition-colors"><i class="fa-brands fa-youtube"></i></a>
+                    <a href="<?php echo htmlspecialchars(getWebSetting('social_youtube')); ?>" target="_blank" class="hover:text-slate-950 transition-colors"><i class="fa-brands fa-youtube"></i></a>
                 <?php endif; ?>
             </div>
         </div>
@@ -134,25 +134,25 @@ if (empty($nav_categories)) {
 
             <!-- Desktop Nav Items with a Single Full-Width Services MegaMenu -->
             <nav class="hidden md:flex items-center space-x-1 lg:space-x-2">
-                <a href="index.php" class="text-slate-600 hover:text-slate-900 px-3 py-2 rounded-md text-sm font-bold transition-colors">
+                <a href="index.php" class="text-slate-300 hover:text-brand-400 px-3 py-2 rounded-md text-sm font-bold transition-colors">
                     Home
                 </a>
 
                 <!-- Services Tab: Static wrapper ensures child spans header width -->
                 <div class="group static">
-                    <a href="services.php" class="text-slate-600 hover:text-slate-900 px-3 py-2 rounded-md text-sm font-bold transition-colors flex items-center gap-1 group/btn">
+                    <a href="services.php" class="text-slate-300 hover:text-brand-400 px-3 py-2 rounded-md text-sm font-bold transition-colors flex items-center gap-1 group/btn">
                         Services
-                        <i class="fa-solid fa-chevron-down text-[9px] text-slate-400 group-hover/btn:text-slate-900 group-hover:rotate-180 transition-transform duration-300"></i>
+                        <i class="fa-solid fa-chevron-down text-[9px] text-slate-400 group-hover/btn:text-brand-400 group-hover:rotate-180 transition-transform duration-300"></i>
                     </a>
 
                     <!-- Full-Width Megamenu Panel: Spans 100% of viewport width -->
-                    <div class="absolute left-0 right-0 w-full mt-2 bg-white border-y border-slate-100 shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform translate-y-2 group-hover:translate-y-0 z-50">
+                    <div class="absolute left-0 right-0 w-full mt-2 bg-slate-950 backdrop-blur-2xl border-y border-slate-800 shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform translate-y-2 group-hover:translate-y-0 z-50">
                         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 grid grid-cols-12 gap-8 text-left">
 
                             <?php foreach ($nav_categories as $n_cat): ?>
                                 <!-- Col: <?php echo htmlspecialchars($n_cat['name']); ?> -->
                                 <div class="col-span-12 sm:col-span-6 lg:col-span-3 space-y-4">
-                                    <h3 class="text-xs font-extrabold text-brand-600 hover:text-brand-500 uppercase tracking-widest border-b border-slate-100 pb-2 transition-colors">
+                                    <h3 class="text-xs font-extrabold text-brand-400 hover:text-brand-300 uppercase tracking-widest border-b border-slate-800 pb-2 transition-colors">
                                         <a href="category.php?slug=<?php echo htmlspecialchars($n_cat['slug'] ?? ''); ?>" class="block flex items-center justify-between">
                                             <span><?php echo htmlspecialchars($n_cat['name']); ?></span>
                                             <i class="fa-solid fa-chevron-right text-[8px] opacity-75"></i>
@@ -160,11 +160,11 @@ if (empty($nav_categories)) {
                                     </h3>
                                     <div class="space-y-3">
                                         <?php if (empty($n_cat['services'])): ?>
-                                            <span class="text-[10px] text-slate-400 font-semibold block italic">Coming soon...</span>
+                                            <span class="text-[10px] text-slate-500 font-semibold block italic">Coming soon...</span>
                                         <?php endif; ?>
                                         <?php foreach ($n_cat['services'] as $n_srv): ?>
-                                            <a href="service-detail.php?slug=<?php echo htmlspecialchars($n_srv['slug']); ?>" class="flex items-start gap-2.5 text-slate-700 hover:text-brand-600 transition-colors group/link">
-                                                <i class="fa-solid fa-circle-check text-slate-350 group-hover/link:text-brand-500 mt-0.5 text-xs"></i>
+                                            <a href="service-detail.php?slug=<?php echo htmlspecialchars($n_srv['slug']); ?>" class="flex items-start gap-2.5 text-slate-300 hover:text-brand-400 transition-colors group/link">
+                                                <i class="fa-solid fa-circle-check text-slate-600 group-hover/link:text-brand-500 mt-0.5 text-xs"></i>
                                                 <span class="text-xs font-semibold"><?php echo htmlspecialchars($n_srv['title']); ?></span>
                                             </a>
                                         <?php endforeach; ?>
@@ -176,16 +176,16 @@ if (empty($nav_categories)) {
                     </div>
                 </div>
 
-                <a href="about.php" class="text-slate-600 hover:text-slate-900 px-3 py-2 rounded-md text-sm font-bold transition-colors">
+                <a href="about.php" class="text-slate-300 hover:text-brand-400 px-3 py-2 rounded-md text-sm font-bold transition-colors">
                     About Us
                 </a>
-                <a href="blog.php" class="text-slate-600 hover:text-slate-900 px-3 py-2 rounded-md text-sm font-bold transition-colors">
+                <a href="blog.php" class="text-slate-300 hover:text-brand-400 px-3 py-2 rounded-md text-sm font-bold transition-colors">
                     Blog
                 </a>
-                <a href="faqs.php" class="text-slate-600 hover:text-slate-900 px-3 py-2 rounded-md text-sm font-bold transition-colors">
+                <a href="faqs.php" class="text-slate-300 hover:text-brand-400 px-3 py-2 rounded-md text-sm font-bold transition-colors">
                     FAQs
                 </a>
-                <a href="contact.php" class="text-slate-600 hover:text-slate-900 px-3 py-2 rounded-md text-sm font-bold transition-colors">
+                <a href="contact.php" class="text-slate-300 hover:text-brand-400 px-3 py-2 rounded-md text-sm font-bold transition-colors">
                     Contact Us
                 </a>
             </nav>
@@ -195,25 +195,25 @@ if (empty($nav_categories)) {
                 <!-- Desktop Search Bar -->
                 <div class="relative w-40 lg:w-48 focus-within:w-60 transition-all duration-300">
                     <input type="text" id="site-search" placeholder="Search services..."
-                        class="w-full text-[10px] font-semibold pl-8 pr-3 py-2 border border-slate-200 rounded-full focus:outline-none focus:border-brand-500 bg-slate-50 hover:bg-slate-100/50 focus:bg-white transition-all">
-                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[10px]"><i class="fa-solid fa-magnifying-glass"></i></span>
+                        class="w-full text-[10px] font-semibold pl-8 pr-3 py-2 border border-slate-800 rounded-full focus:outline-none focus:border-brand-500 bg-slate-900 hover:bg-slate-850 focus:bg-slate-950 text-slate-200 transition-all">
+                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-[10px]"><i class="fa-solid fa-magnifying-glass"></i></span>
 
                     <!-- Search Results Dropdown -->
-                    <div id="search-results" class="absolute right-0 top-full mt-2 w-72 bg-white border border-slate-200 rounded-2xl shadow-xl hidden z-50 p-2 text-left space-y-0.5"></div>
+                    <div id="search-results" class="absolute right-0 top-full mt-2 w-72 bg-slate-900 border border-slate-800 rounded-2xl shadow-xl hidden z-50 p-2 text-left space-y-0.5"></div>
                 </div>
 
                 <a href="contact.php" class="px-5 py-3 rounded-full text-xs font-bold text-white accent-gradient hover:shadow-lg hover:shadow-brand-500/10 transition-all duration-300 hover:-translate-y-0.5">
                     Free Consultation
                 </a>
                 <!-- Toggler button for Full-Screen Slide-down Overlay Panel -->
-                <button type="button" id="mega-drawer-toggle" class="p-2.5 rounded-full border border-slate-200 hover:border-brand-500 text-slate-600 hover:text-brand-600 hover:bg-slate-50 transition-colors flex items-center justify-center focus:outline-none" aria-label="Toggle Fullscreen Panel">
+                <button type="button" id="mega-drawer-toggle" class="p-2.5 rounded-full border border-slate-800 hover:border-brand-500 text-slate-300 hover:text-brand-400 hover:bg-slate-900 transition-colors flex items-center justify-center focus:outline-none" aria-label="Toggle Fullscreen Panel">
                     <i class="fa-solid fa-bars-staggered text-sm"></i>
                 </button>
             </div>
 
             <!-- Mobile Hamburger Menu Button -->
             <div class="flex items-center md:hidden">
-                <button type="button" id="mobile-menu-button" class="inline-flex items-center justify-center p-2.5 rounded-xl text-slate-500 hover:text-slate-900 hover:bg-slate-100 focus:outline-none" aria-controls="mobile-menu" aria-expanded="false">
+                <button type="button" id="mobile-menu-button" class="inline-flex items-center justify-center p-2.5 rounded-xl text-slate-400 hover:text-brand-400 hover:bg-slate-900 focus:outline-none animate-pulse-slow" aria-controls="mobile-menu" aria-expanded="false">
                     <span class="sr-only">Open main menu</span>
                     <!-- Icon Open Menu -->
                     <svg class="block h-6 w-6" id="menu-icon-open" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
@@ -229,40 +229,40 @@ if (empty($nav_categories)) {
     </div>
 
     <!-- Mobile Drawer Menu -->
-    <div class="hidden md:hidden border-t border-slate-100 bg-white/98 backdrop-blur-2xl transition-all duration-300 shadow-xl" id="mobile-menu">
+    <div class="hidden md:hidden border-t border-slate-800 bg-slate-950 backdrop-blur-2xl transition-all duration-300 shadow-xl" id="mobile-menu">
         <div class="px-4 pt-3 pb-6 space-y-4 max-h-[85vh] overflow-y-auto">
             <!-- Mobile search input -->
             <div class="relative px-3 py-1">
                 <input type="text" id="site-search-mobile" placeholder="Search services..."
-                    class="w-full text-xs font-semibold pl-9 pr-3 py-2.5 border border-slate-200 rounded-full focus:outline-none focus:border-brand-500 bg-slate-50 focus:bg-white transition-all">
-                <span class="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 text-[11px]"><i class="fa-solid fa-magnifying-glass"></i></span>
+                    class="w-full text-xs font-semibold pl-9 pr-3 py-2.5 border border-slate-800 rounded-full focus:outline-none focus:border-brand-500 bg-slate-900 focus:bg-slate-950 text-slate-200 transition-all">
+                <span class="absolute left-6 top-1/2 -translate-y-1/2 text-slate-500 text-[11px]"><i class="fa-solid fa-magnifying-glass"></i></span>
 
                 <!-- Mobile Search Results Dropdown -->
-                <div id="search-results-mobile" class="absolute left-3 right-3 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-lg hidden z-50 p-2 text-left space-y-0.5"></div>
+                <div id="search-results-mobile" class="absolute left-3 right-3 top-full mt-1 bg-slate-900 border border-slate-800 rounded-xl shadow-lg hidden z-50 p-2 text-left space-y-0.5"></div>
             </div>
 
             <!-- Mobile Menu Links -->
             <div class="space-y-1">
-                <a href="index.php" class="block px-3 py-2 text-base font-bold text-slate-800 hover:bg-slate-50 rounded-lg">Home</a>
-                <a href="services.php" class="block px-3 py-2 text-base font-bold text-slate-800 hover:bg-slate-50 rounded-lg">Services</a>
-                <a href="about.php" class="block px-3 py-2 text-base font-bold text-slate-800 hover:bg-slate-50 rounded-lg">About Us</a>
-                <a href="blog.php" class="block px-3 py-2 text-base font-bold text-slate-800 hover:bg-slate-50 rounded-lg">Blog</a>
-                <a href="faqs.php" class="block px-3 py-2 text-base font-bold text-slate-800 hover:bg-slate-50 rounded-lg">FAQs</a>
-                <a href="contact.php" class="block px-3 py-2 text-base font-bold text-slate-800 hover:bg-slate-50 rounded-lg">Contact Us</a>
+                <a href="index.php" class="block px-3 py-2 text-base font-bold text-slate-200 hover:bg-slate-900 rounded-lg">Home</a>
+                <a href="services.php" class="block px-3 py-2 text-base font-bold text-slate-200 hover:bg-slate-900 rounded-lg">Services</a>
+                <a href="about.php" class="block px-3 py-2 text-base font-bold text-slate-200 hover:bg-slate-900 rounded-lg">About Us</a>
+                <a href="blog.php" class="block px-3 py-2 text-base font-bold text-slate-200 hover:bg-slate-900 rounded-lg">Blog</a>
+                <a href="faqs.php" class="block px-3 py-2 text-base font-bold text-slate-200 hover:bg-slate-900 rounded-lg">FAQs</a>
+                <a href="contact.php" class="block px-3 py-2 text-base font-bold text-slate-200 hover:bg-slate-900 rounded-lg">Contact Us</a>
             </div>
 
             <!-- Mobile Services Collapse List -->
-            <div class="border-t border-slate-100 pt-3 space-y-3">
-                <span class="block px-3 py-1 text-[11px] font-bold text-slate-400 uppercase tracking-widest">Our Services</span>
+            <div class="border-t border-slate-800 pt-3 space-y-3">
+                <span class="block px-3 py-1 text-[11px] font-bold text-slate-500 uppercase tracking-widest">Our Services</span>
 
                 <?php foreach ($nav_categories as $m_cat): ?>
                     <div class="space-y-1.5 pl-3 text-left">
-                        <a href="category.php?slug=<?php echo htmlspecialchars($m_cat['slug'] ?? ''); ?>" class="block px-3 py-0.5 text-xs font-bold text-brand-600 uppercase hover:text-brand-500 transition-colors"><?php echo htmlspecialchars($m_cat['name']); ?></a>
+                        <a href="category.php?slug=<?php echo htmlspecialchars($m_cat['slug'] ?? ''); ?>" class="block px-3 py-0.5 text-xs font-bold text-brand-400 uppercase hover:text-brand-350 transition-colors"><?php echo htmlspecialchars($m_cat['name']); ?></a>
                         <?php if (empty($m_cat['services'])): ?>
-                            <span class="block pl-6 pr-3 py-0.5 text-xs text-slate-400 italic">Coming soon...</span>
+                            <span class="block pl-6 pr-3 py-0.5 text-xs text-slate-500 italic">Coming soon...</span>
                         <?php endif; ?>
                         <?php foreach (($m_cat['services'] ?? []) as $m_srv): ?>
-                            <a href="service-detail.php?slug=<?php echo htmlspecialchars($m_srv['slug']); ?>" class="block pl-6 pr-3 py-1 text-sm text-slate-655 hover:text-slate-900">
+                            <a href="service-detail.php?slug=<?php echo htmlspecialchars($m_srv['slug']); ?>" class="block pl-6 pr-3 py-1 text-sm text-slate-300 hover:text-brand-400 transition-colors">
                                 <?php echo htmlspecialchars($m_srv['title']); ?>
                             </a>
                         <?php endforeach; ?>
@@ -283,38 +283,38 @@ if (empty($nav_categories)) {
 <div id="mega-drawer" class="fixed inset-0 w-screen h-screen bg-slate-900  z-[100] transition-all duration-500 ease-in-out transform -translate-y-full opacity-0 pointer-events-none flex flex-col justify-between overflow-y-auto">
 
     <!-- Mega Drawer Top Header (Logo + Contact Details (Phone & Email) + Close Button) -->
-    <div class="w-full border-b border-slate-800 bg-slate-900 flex-shrink-0">
+    <div class="w-full border-b border-brand-600 accent-gradient flex-shrink-0 shadow-md">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-24 flex items-center justify-between gap-4">
-            <!-- Brand Logo (Left) -->
-            <div class="flex-shrink-0">
-                <img class="h-12 w-auto object-contain" src="<?php echo getWebSetting('logo_url'); ?>" alt="Zenvora Logo">
+            <!-- Brand Logo (Left - Enclosed in a premium Black Box) -->
+            <div class="flex-shrink-0 bg-slate-950 px-5 py-2 rounded-2xl border border-white/10 shadow-md">
+                <img class="h-14 w-auto object-contain" src="<?php echo getWebSetting('logo_url'); ?>" alt="Zenvora Logo">
             </div>
 
-            <!-- Contact Details: Phone & Email (Center - Positioned between Logo and Close Button) -->
-            <div class="hidden md:flex items-center gap-8 text-slate-300">
+            <!-- Contact Details: Phone & Email (Center - White Text with Black Icon Circles) -->
+            <div class="hidden md:flex items-center gap-8 text-white">
                 <?php
                 $hdrPhones = getWebPhones();
                 foreach ($hdrPhones as $hp):
                 ?>
-                    <a href="tel:<?php echo htmlspecialchars($hp['value']); ?>" class="flex items-center gap-2.5 text-sm font-bold hover:text-brand-400 transition-colors group/tel-hdr">
-                        <span class="w-8 h-8 rounded-lg bg-brand-500/10 text-brand-500 flex items-center justify-center text-xs group-hover/tel-hdr:bg-brand-500 group-hover/tel-hdr:text-white transition-colors"><i class="fa-solid fa-phone"></i></span>
+                    <a href="tel:<?php echo htmlspecialchars($hp['value']); ?>" class="flex items-center gap-2.5 text-sm font-bold hover:text-slate-950 transition-colors group/tel-hdr">
+                        <span class="w-8 h-8 rounded-lg bg-slate-950 text-brand-400 flex items-center justify-center text-xs group-hover/tel-hdr:bg-white group-hover/tel-hdr:text-slate-950 transition-colors shadow-sm"><i class="fa-solid fa-phone"></i></span>
                         <div class="text-left leading-none">
-                            <span class="text-[9px] text-slate-500 font-bold block mb-0.5 uppercase tracking-wider"><?php echo htmlspecialchars($hp['label']); ?></span>
-                            <span><?php echo htmlspecialchars($hp['value']); ?></span>
+                            <span class="text-[9px] text-white/70 font-bold block mb-0.5 uppercase tracking-wider"><?php echo htmlspecialchars($hp['label']); ?></span>
+                            <span class="drop-shadow-sm"><?php echo htmlspecialchars($hp['value']); ?></span>
                         </div>
                     </a>
                 <?php endforeach; ?>
-                <a href="mailto:<?php echo getWebSetting('email_1'); ?>" class="flex items-center gap-2.5 text-sm font-bold hover:text-brand-400 transition-colors group/mail-hdr">
-                    <span class="w-8 h-8 rounded-lg bg-brand-500/10 text-brand-500 flex items-center justify-center text-xs group-hover/mail-hdr:bg-brand-500 group-hover/mail-hdr:text-white transition-colors"><i class="fa-solid fa-envelope"></i></span>
+                <a href="mailto:<?php echo getWebSetting('email_1'); ?>" class="flex items-center gap-2.5 text-sm font-bold hover:text-slate-950 transition-colors group/mail-hdr">
+                    <span class="w-8 h-8 rounded-lg bg-slate-950 text-brand-400 flex items-center justify-center text-xs group-hover/mail-hdr:bg-white group-hover/mail-hdr:text-slate-950 transition-colors shadow-sm"><i class="fa-solid fa-envelope"></i></span>
                     <div class="text-left leading-none">
-                        <span class="text-[9px] text-slate-500 font-bold block mb-0.5 uppercase tracking-wider">Email Us</span>
-                        <span><?php echo getWebSetting('email_1'); ?></span>
+                        <span class="text-[9px] text-white/70 font-bold block mb-0.5 uppercase tracking-wider">Email Us</span>
+                        <span class="drop-shadow-sm"><?php echo getWebSetting('email_1'); ?></span>
                     </div>
                 </a>
             </div>
 
-            <!-- Large Close Button (Right) -->
-            <button type="button" id="mega-drawer-close" class="w-12 h-12 rounded-full border border-slate-700 hover:border-brand-500 text-slate-300 hover:text-brand-400 hover:bg-slate-800 transition-all duration-300 flex items-center justify-center focus:outline-none text-xl group" aria-label="Close Menu">
+            <!-- Large Close Button (Right - Styled in a premium Black Circle Box) -->
+            <button type="button" id="mega-drawer-close" class="w-12 h-12 rounded-full border border-white/10 text-white bg-slate-950 hover:bg-slate-900 transition-all duration-300 flex items-center justify-center focus:outline-none text-xl group shadow-md" aria-label="Close Menu">
                 <i class="fa-solid fa-xmark group-hover:rotate-90 transition-transform duration-300"></i>
             </button>
         </div>
@@ -556,14 +556,14 @@ if (empty($nav_categories)) {
                         : `<i class="fa-solid fa-arrow-turn-up text-brand-500 text-[9px] rotate-90"></i>`;
                     const typeLabel = isService ? 'Service' : 'Section';
                     return `
-                        <button type="button" class="search-result-btn w-full text-left p-2.5 hover:bg-slate-50 rounded-xl transition-colors flex flex-col" 
+                        <button type="button" class="search-result-btn w-full text-left p-2.5 hover:bg-slate-850 rounded-xl transition-colors flex flex-col" 
                                 data-type="${isService ? 'service' : 'section'}" 
                                 data-target="${isService ? match.slug : match.id}">
-                            <span class="text-[11px] font-extrabold text-slate-900 flex items-center gap-1.5">
+                            <span class="text-[11px] font-extrabold text-slate-200 flex items-center gap-1.5">
                                 ${iconHtml} ${match.title}
-                                <span class="ml-auto text-[8px] text-slate-400 border border-slate-200 px-1.5 py-0.5 rounded uppercase font-semibold">${typeLabel}</span>
+                                <span class="ml-auto text-[8px] text-slate-400 border border-slate-800 px-1.5 py-0.5 rounded uppercase font-semibold">${typeLabel}</span>
                             </span>
-                            <span class="text-[9px] text-slate-400 font-semibold mt-0.5">${match.desc}</span>
+                            <span class="text-[9px] text-slate-450 font-semibold mt-0.5">${match.desc}</span>
                         </button>
                     `;
                 }).join('');

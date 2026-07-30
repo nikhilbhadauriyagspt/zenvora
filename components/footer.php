@@ -100,7 +100,7 @@ if (empty($footer_categories)) {
             <div class="md:col-span-4 space-y-4 text-left">
                 <div class="flex items-center gap-3">
                     <img class="h-8 w-auto opacity-95" src="<?php echo getWebSetting('logo_url'); ?>" alt="Zenvora Logo">
-                    <span class="font-extrabold text-white tracking-widest text-sm">ZENVORA</span>
+                    <span class="font-extrabold text-brand-400 tracking-widest text-sm">ZENVORA</span>
                 </div>
                 <p class="leading-relaxed text-slate-400 text-[11px] max-w-sm">
                     Unified legal, tax, and NGO compliance infrastructure engineered for modern Indian startups and global enterprises. Direct online access to CA panel desks.
@@ -129,7 +129,7 @@ if (empty($footer_categories)) {
 
             <!-- Col 2: Quick Links (Col span 3) -->
             <div class="md:col-span-3 space-y-4 text-left">
-                <h4 class="text-xs font-extrabold uppercase tracking-widest text-white border-b border-slate-850 pb-2">
+                <h4 class="text-xs font-extrabold uppercase tracking-widest text-brand-400 border-b border-slate-850 pb-2">
                     Quick Navigation
                 </h4>
                 <ul class="space-y-2 text-[11px]">
@@ -144,7 +144,7 @@ if (empty($footer_categories)) {
 
             <!-- Col 3: Contact Info Desk (Col span 5) -->
             <div class="md:col-span-5 space-y-4 text-left">
-                <h4 class="text-xs font-extrabold uppercase tracking-widest text-white border-b border-slate-850 pb-2">
+                <h4 class="text-xs font-extrabold uppercase tracking-widest text-brand-400 border-b border-slate-850 pb-2">
                     Get In Touch
                 </h4>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 text-[11px] leading-relaxed">
@@ -201,7 +201,7 @@ if (empty($footer_categories)) {
                 <?php foreach ($footer_categories as $f_cat): ?>
                 <!-- Category Column -->
                 <div class="space-y-4">
-                    <h4 class="text-[11px] font-extrabold uppercase tracking-widest text-slate-200 border-b border-slate-800 pb-2">
+                    <h4 class="text-[11px] font-extrabold uppercase tracking-widest text-brand-400 border-b border-slate-850 pb-2">
                         <?php echo htmlspecialchars($f_cat['name']); ?>
                     </h4>
                     <ul class="space-y-2.5 text-[11px]">
@@ -222,12 +222,12 @@ if (empty($footer_categories)) {
         </div>
 
         <!-- Bottom Row: Copyright & CIN -->
-        <div class="border-t border-slate-800 pt-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 text-[10px] text-slate-500">
+        <div class="border-t border-slate-800 pt-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 text-[10px] text-slate-500 relative z-10">
             <div class="space-y-1 text-left">
                 <p>&copy; 2026 Zenvora Global Solutions Private Limited. All rights reserved.</p>
                 <p class="text-slate-650">CIN: U74999UP2018PTC105187 | MCA Registered Corporate Agent</p>
                 <p class="text-slate-650 mt-1.5 leading-normal max-w-3xl">
-                    <strong>CA Advisory Note:</strong> Outsource your legal, tax, and NGO registrations to our panel of CAs & lawyers. Every process is supervised and verified directly by qualified professionals.
+                    <strong class="text-brand-400">CA Advisory Note:</strong> Outsource your legal, tax, and NGO registrations to our panel of CAs & lawyers. Every process is supervised and verified directly by qualified professionals.
                 </p>
             </div>
             
@@ -239,8 +239,74 @@ if (empty($footer_categories)) {
 
     </div>
 
-    <!-- Massive decorative background watermark -->
-    <div class="absolute bottom-[-50px] right-[-30px] text-slate-950/20 text-[14vw] font-black tracking-widest uppercase select-none pointer-events-none z-0">
+    <!-- Massive decorative background watermark (Centered & Perfectly Visible) -->
+    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-slate-950/30 text-[16vw] font-black tracking-widest uppercase select-none pointer-events-none z-0">
         ZENVORA
     </div>
 </footer>
+
+<!-- Floating CA/CS Advisory Action Desk -->
+<div class="fixed bottom-6 right-6 z-50 flex flex-col gap-3.5 items-end">
+    
+    <!-- Call Helpline Action Button -->
+    <?php
+    $webPhones = getWebPhones();
+    $callPhone = !empty($webPhones) ? reset($webPhones)['value'] : '+91 98765 43210';
+    $whatsappNum = getWebSetting('whatsapp_number') ?: '9876543210';
+    ?>
+    <div class="relative group">
+        <!-- Floating Tooltip -->
+        <span class="absolute right-14 top-1/2 -translate-y-1/2 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-[9px] font-black text-white uppercase tracking-wider opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity duration-300 shadow-xl whitespace-nowrap font-sans">
+            Call a CA Helpline
+        </span>
+        <!-- Pulsing Wave Ring behind button -->
+        <span class="absolute inset-0 rounded-full bg-brand-500/40 animate-ping opacity-75"></span>
+        <!-- Main Floating Button -->
+        <a href="tel:<?php echo htmlspecialchars($callPhone); ?>" 
+           class="relative w-12 h-12 rounded-full accent-gradient border border-brand-400 hover:border-brand-300 text-white flex items-center justify-center shadow-lg transition-transform duration-300 hover:scale-110 hover:-rotate-12 group-hover:shadow-brand-500/20">
+            <i class="fa-solid fa-phone text-sm animate-bounce-slow"></i>
+        </a>
+    </div>
+
+    <!-- WhatsApp Support Action Button -->
+    <div class="relative group">
+        <!-- Floating Tooltip -->
+        <span class="absolute right-14 top-1/2 -translate-y-1/2 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-[9px] font-black text-white uppercase tracking-wider opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity duration-300 shadow-xl whitespace-nowrap font-sans">
+            Chat on WhatsApp
+        </span>
+        <!-- Pulsing Wave Ring behind button -->
+        <span class="absolute inset-0 rounded-full bg-emerald-500/40 animate-ping opacity-75"></span>
+        <!-- Main Floating Button -->
+        <a href="https://wa.me/<?php echo htmlspecialchars(preg_replace('/[^0-9]/', '', $whatsappNum)); ?>" target="_blank"
+           class="relative w-12 h-12 rounded-full bg-emerald-600 border border-emerald-500 hover:border-emerald-400 text-white flex items-center justify-center shadow-lg transition-transform duration-300 hover:scale-110 hover:rotate-12 group-hover:shadow-emerald-500/20">
+            <i class="fa-brands fa-whatsapp text-lg"></i>
+        </a>
+    </div>
+
+</div>
+
+<!-- Additional custom styles for Floating FAB elements -->
+<style>
+    @keyframes bounce-slow {
+        0%, 100% {
+            transform: translateY(0);
+        }
+        50% {
+            transform: translateY(-2px);
+        }
+    }
+    .animate-bounce-slow {
+        animation: bounce-slow 2s infinite ease-in-out;
+    }
+</style>
+
+<?php
+// Load global welcome lead generation popup modal (shows once per device)
+include_once 'components/welcome-popup.php';
+
+// Custom Footer Scripts (For chatbot integrations, body trackers, etc.)
+$custom_footer = getWebSetting('seo_custom_footer');
+if (!empty($custom_footer)) {
+    echo $custom_footer . "\n";
+}
+?>

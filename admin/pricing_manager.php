@@ -186,6 +186,17 @@ if (isset($_GET['success'])) {
                 <a href="pricing_manager.php" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold hover:bg-slate-800 hover:text-white transition-all bg-brand-500/10 text-brand-400 border border-brand-500/20">
                     <i class="fa-solid fa-tags text-sm"></i> <span>Pricing Packages</span>
                 </a>
+                <a href="platform_manager.php" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold hover:bg-slate-800 hover:text-white transition-all text-slate-400">
+                    <i class="fa-solid fa-earth-americas text-sm"></i> <span>Global Operations</span>
+                </a>
+                <a href="seo_manager.php" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold hover:bg-slate-800 hover:text-white transition-all text-slate-400">
+                    <i class="fa-solid fa-search text-sm"></i> <span>Page SEO Settings</span>
+                </a>
+                
+                <span class="block px-3 py-1 text-[9px] font-extrabold text-slate-500 uppercase tracking-widest mt-6 mb-2 flex items-center gap-1.5"><i class="fa-solid fa-user-shield text-[9px]"></i> Account</span>
+                <a href="change_password.php" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold hover:bg-slate-800 hover:text-white transition-all text-slate-400">
+                    <i class="fa-solid fa-key text-sm"></i> <span>Change Password</span>
+                </a>
             </nav>
         </div>
 

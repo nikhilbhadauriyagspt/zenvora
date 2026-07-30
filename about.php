@@ -22,7 +22,7 @@ $advisors = json_decode(getWebSetting('about_advisors_list'), true) ?? [];
     <?php include_once 'components/head.php'; ?>
 </head>
 
-<body class="bg-white font-sans text-slate-600 antialiased selection:bg-brand-500 selection:text-white">
+<body class="subpage-theme bg-white font-sans text-slate-600 antialiased selection:bg-brand-500 selection:text-white">
 
     <!-- Global Header Navigation -->
     <?php include_once 'components/header.php'; ?>

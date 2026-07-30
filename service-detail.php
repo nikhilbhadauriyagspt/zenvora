@@ -102,6 +102,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 }
+
+// Define custom SEO metadata variables for head.php inclusion (Automatic generation from service details)
+$custom_page_title = htmlspecialchars($service['title']) . ' Registration | Zenvora Global Solutions';
+$custom_page_desc = 'Incorporate your ' . htmlspecialchars($service['title']) . ' in India. CA-assisted process, transparent government fees, 100% online setup.';
+$custom_page_keys = htmlspecialchars($service['title']) . ' Registration, ' . htmlspecialchars($service['category_name']) . ', Legal Compliance, Zenvora';
+$custom_page_canonical = 'http://localhost/commanpro/service-detail.php?slug=' . htmlspecialchars($service['slug']);
 ?>
 <!DOCTYPE html>
 <html lang="en" class="scroll-smooth">
@@ -109,8 +115,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo htmlspecialchars($service['title']); ?> Registration | Zenvora</title>
-    <meta name="description" content="Incorporate your <?php echo htmlspecialchars($service['title']); ?> in India. CA-assisted process, transparent government fees, 100% online setup.">
     
     <!-- Load Head dependencies (Tailwind CDN, Fonts, Font Awesome) -->
     <?php include_once 'components/head.php'; ?>
@@ -140,7 +144,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </script>
 </head>
 
-<body class="bg-white font-sans text-slate-650 antialiased selection:bg-brand-500 selection:text-white">
+<body class="subpage-theme bg-white font-sans text-slate-650 antialiased selection:bg-brand-500 selection:text-white">
 
     <!-- Global Header Navigation -->
     <?php include_once 'components/header.php'; ?>

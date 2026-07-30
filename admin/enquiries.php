@@ -195,6 +195,17 @@ if ($pdo !== null) {
                     <a href="pricing_manager.php" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold hover:bg-slate-800 hover:text-white transition-all <?php echo (basename($_SERVER['PHP_SELF']) === 'pricing_manager.php') ? 'bg-brand-500/10 text-brand-400 border border-brand-500/20' : 'text-slate-400'; ?>">
                         <i class="fa-solid fa-tags text-sm"></i> <span class="whitespace-nowrap">Pricing Packages</span>
                     </a>
+                    <a href="platform_manager.php" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold hover:bg-slate-800 hover:text-white transition-all <?php echo (basename($_SERVER['PHP_SELF']) === 'platform_manager.php') ? 'bg-brand-500/10 text-brand-400 border border-brand-500/20' : 'text-slate-400'; ?>">
+                        <i class="fa-solid fa-earth-americas text-sm"></i> <span class="whitespace-nowrap">Global Operations</span>
+                    </a>
+                    <a href="seo_manager.php" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold hover:bg-slate-800 hover:text-white transition-all <?php echo (basename($_SERVER['PHP_SELF']) === 'seo_manager.php') ? 'bg-brand-500/10 text-brand-400 border border-brand-500/20' : 'text-slate-400'; ?>">
+                        <i class="fa-solid fa-search text-sm"></i> <span class="whitespace-nowrap">Page SEO Settings</span>
+                    </a>
+                    
+                    <span class="block px-3 py-1 text-[9px] font-extrabold text-slate-500 uppercase tracking-widest mt-6 mb-2 flex items-center gap-1.5"><i class="fa-solid fa-user-shield text-[9px]"></i> Account</span>
+                    <a href="change_password.php" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold hover:bg-slate-800 hover:text-white transition-all <?php echo (basename($_SERVER['PHP_SELF']) === 'change_password.php') ? 'bg-brand-500/10 text-brand-400 border border-brand-500/20' : 'text-slate-400'; ?>">
+                        <i class="fa-solid fa-key text-sm"></i> <span class="whitespace-nowrap">Change Password</span>
+                    </a>
                 </nav>
             </div>
 
@@ -214,21 +225,7 @@ if ($pdo !== null) {
         <div class="flex-grow flex flex-col min-w-0 bg-slate-50 overflow-hidden">
             
             <!-- Header bar -->
-            <header class="bg-white border-b border-slate-200 h-16 flex items-center justify-between px-6 flex-shrink-0">
-                <div class="flex items-center gap-4">
-                    <button type="button" id="sidebar-toggle-btn" class="p-2.5 rounded-xl border border-slate-200 text-slate-650 hover:bg-slate-50 transition-colors flex items-center justify-center focus:outline-none">
-                        <i class="fa-solid fa-bars-staggered text-sm"></i>
-                    </button>
-                    <span class="text-sm font-black text-slate-900 hidden sm:inline-block uppercase tracking-wider">Customer Enquiries</span>
-                </div>
-
-                <div class="flex items-center gap-4">
-                    <div class="hidden lg:flex items-center gap-2 px-3 py-1.5 bg-emerald-50 border border-emerald-500/10 rounded-full">
-                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                        <span class="text-[10px] font-bold text-slate-700">CA Panel Live</span>
-                    </div>
-                </div>
-            </header>
+            <?php include_once 'admin_header.php'; ?>
 
             <!-- Scrollable workspace content -->
             <main class="flex-1 overflow-y-auto p-6 md:p-8 space-y-6">
@@ -435,16 +432,6 @@ if ($pdo !== null) {
     <!-- Script Helpers -->
     <script>
         // Sidebar Toggle logic
-        const toggleBtn = document.getElementById('sidebar-toggle-btn');
-        const sidebar = document.getElementById('admin-sidebar');
-        if (toggleBtn && sidebar) {
-            toggleBtn.addEventListener('click', () => {
-                sidebar.classList.toggle('w-64');
-                sidebar.classList.toggle('w-0');
-                sidebar.classList.toggle('p-6');
-                sidebar.classList.toggle('p-0');
-            });
-        }
 
         // Live filtering search box
         const searchBox = document.getElementById('leads-search-box');

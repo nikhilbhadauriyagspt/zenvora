@@ -34,7 +34,10 @@ include_once 'components/header.php';
     include_once 'components/services.php';
     ?>
 
-
+    <?php
+    // Load Moving Marquee Accent Divider
+    include_once 'components/marquee-accent.php';
+    ?>
 
     <?php
     // Load Process Section (Clean Flat Onboarding Steps)

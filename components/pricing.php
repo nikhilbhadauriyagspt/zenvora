@@ -1,6 +1,6 @@
 <?php
 /**
- * Zenvora Premium Pricing Section - Dynamic Slider/Carousel Component
+ * Zenvora Premium Pricing Section - Dynamic Slider/Carousel Component (Dark Theme)
  * Loads pricing tiers dynamically from the MySQL database with mobile carousel fallback.
  */
 
@@ -49,22 +49,22 @@ if (empty($db_packages)) {
     ];
 }
 ?>
-<!-- Zenvora Premium Pricing Section (Light Theme, 3-Tier Spotlight Grid, Dynamic Carousel Slider) -->
-<section id="pricing" class="relative py-24 bg-white border-b border-slate-100 overflow-hidden">
+<!-- Zenvora Premium Pricing Section (Dark Theme, 3-Tier Spotlight Grid, Dynamic Carousel Slider) -->
+<section id="pricing" class="relative py-24 bg-slate-950 border-b border-slate-900 overflow-hidden">
     <!-- Subtle Background Decorators -->
-    <div class="absolute inset-0 opacity-[0.02] pointer-events-none bg-[radial-gradient(#bc8731_1px,transparent_1px)] [background-size:24px_24px]"></div>
+    <div class="absolute inset-0 opacity-[0.04] pointer-events-none bg-[radial-gradient(#bc8731_1px,transparent_1px)] [background-size:24px_24px]"></div>
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
         <!-- Section Header -->
         <div class="max-w-3xl text-left mb-16 space-y-4">
-            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-extrabold bg-brand-500/10 border border-brand-500/20 text-brand-700 uppercase tracking-widest">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-extrabold bg-brand-500/10 border border-brand-500/30 text-brand-400 uppercase tracking-widest">
                 <i class="fa-solid fa-tags text-[9px]"></i> Flat Pricing
             </span>
-            <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight leading-tight">
+            <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-50 tracking-tight leading-tight">
                 Transparent Packages. Zero Hidden Fees.
             </h2>
-            <p class="text-slate-500 text-sm leading-relaxed font-semibold">
+            <p class="text-slate-400 text-sm leading-relaxed font-semibold">
                 Select a compliance tier designed for your company stage. All government challans are itemized and shared directly.
             </p>
         </div>
@@ -81,11 +81,11 @@ if (empty($db_packages)) {
                 ?>
                 <!-- Pricing Card slide -->
                 <div class="w-full flex-shrink-0 md:w-auto md:flex-shrink-1 p-1">
-                    <div class="h-full rounded-3xl p-8 border flex flex-col justify-between relative <?php echo $isFeatured ? 'bg-slate-900 text-white border-2 border-brand-500/40 shadow-xl transform md:-translate-y-2 z-10' : 'bg-slate-50/50 text-slate-650 border-slate-200/60 hover:border-slate-350 transition-all duration-300'; ?>">
+                    <div class="h-full rounded-3xl p-8 border flex flex-col justify-between relative <?php echo $isFeatured ? 'bg-slate-900 text-white border-2 border-brand-500 shadow-xl shadow-brand-500/15 transform md:-translate-y-2 z-10 hover:shadow-brand-500/25 transition-all duration-300' : 'bg-slate-900/40 text-slate-300 border-slate-800 hover:border-brand-500/30 hover:-translate-y-1 hover:shadow-lg shadow-black/10 transition-all duration-300'; ?>">
                         
                         <?php if ($pkg['badge']): ?>
                         <!-- Most Popular Tag -->
-                        <span class="absolute top-0 right-8 -translate-y-1/2 px-3 py-1 bg-brand-500 text-white text-[9px] font-black uppercase tracking-widest rounded-full z-20">
+                        <span class="absolute top-0 right-8 -translate-y-1/2 px-3 py-1 bg-brand-500 text-slate-950 text-[9px] font-black uppercase tracking-widest rounded-full z-20 shadow">
                             <?php echo htmlspecialchars($pkg['badge']); ?>
                         </span>
                         <?php endif; ?>
@@ -93,35 +93,35 @@ if (empty($db_packages)) {
                         <div class="space-y-6">
                             <!-- Package Name & Target -->
                             <div class="space-y-1 text-left">
-                                <h3 class="text-base font-extrabold <?php echo $isFeatured ? 'text-white' : 'text-slate-900'; ?>"><?php echo htmlspecialchars($pkg['title']); ?></h3>
-                                <p class="text-[11px] <?php echo $isFeatured ? 'text-brand-400' : 'text-slate-400'; ?> font-semibold uppercase tracking-wider"><?php echo htmlspecialchars($pkg['subtitle']); ?></p>
+                                <h3 class="text-base font-extrabold text-white"><?php echo htmlspecialchars($pkg['title']); ?></h3>
+                                <p class="text-[11px] <?php echo $isFeatured ? 'text-brand-400' : 'text-brand-400/80'; ?> font-semibold uppercase tracking-wider"><?php echo htmlspecialchars($pkg['subtitle']); ?></p>
                             </div>
 
                             <!-- Price -->
-                            <div class="mt-6 flex items-baseline <?php echo $isFeatured ? 'text-white' : 'text-slate-900'; ?> gap-1 text-left">
-                                <span class="text-3xl font-black <?php echo $isFeatured ? 'text-brand-400' : 'text-slate-900'; ?>"><?php echo htmlspecialchars($pkg['price']); ?></span>
-                                <span class="<?php echo $isFeatured ? 'text-slate-450' : 'text-slate-450'; ?> text-[10px] font-semibold tracking-wider uppercase"><?php echo htmlspecialchars($pkg['tax_note']); ?></span>
+                            <div class="mt-6 flex items-baseline text-white gap-1 text-left">
+                                <span class="text-3xl font-black text-brand-400"><?php echo htmlspecialchars($pkg['price']); ?></span>
+                                <span class="text-slate-500 text-[10px] font-semibold tracking-wider uppercase"><?php echo htmlspecialchars($pkg['tax_note']); ?></span>
                             </div>
 
-                            <p class="text-xs <?php echo $isFeatured ? 'text-slate-400' : 'text-slate-550'; ?> mt-4 leading-relaxed font-medium text-left">
+                            <p class="text-xs text-slate-400 mt-4 leading-relaxed font-medium text-left font-medium">
                                 <?php echo htmlspecialchars($pkg['description']); ?>
                             </p>
 
                             <!-- Deliverables Checklist -->
-                            <ul class="mt-8 space-y-4 text-xs font-semibold <?php echo $isFeatured ? 'text-slate-200' : 'text-slate-700'; ?> text-left">
+                            <ul class="mt-8 space-y-4 text-xs font-semibold <?php echo $isFeatured ? 'text-slate-200' : 'text-slate-350'; ?> text-left">
                                 <?php foreach ($lines as $ln): 
                                     if (trim($ln) === '') continue;
                                 ?>
                                 <li class="flex items-start gap-3">
-                                    <span class="w-5 h-5 rounded-full <?php echo $isFeatured ? 'bg-brand-500/20 text-brand-400' : 'bg-brand-500/10 text-brand-500'; ?> flex items-center justify-center text-[10px] mt-0.5 flex-shrink-0"><i class="fa-solid fa-check"></i></span>
+                                    <span class="w-5 h-5 rounded-full <?php echo $isFeatured ? 'bg-brand-500/25 text-brand-400' : 'bg-brand-500/15 text-brand-400'; ?> flex items-center justify-center text-[10px] mt-0.5 flex-shrink-0"><i class="fa-solid fa-check"></i></span>
                                     <span><?php echo htmlspecialchars($ln); ?></span>
                                 </li>
                                 <?php endforeach; ?>
                             </ul>
                         </div>
 
-                        <div class="mt-8 pt-6 border-t <?php echo $isFeatured ? 'border-slate-800' : 'border-slate-200/50'; ?>">
-                            <a href="#contact" class="block w-full text-center py-3.5 rounded-xl text-xs font-black <?php echo $isFeatured ? 'text-slate-950 bg-brand-500 hover:bg-brand-400' : 'text-slate-900 bg-white hover:bg-slate-100 border border-slate-250'; ?> transition-all duration-200 hover:-translate-y-0.5">
+                        <div class="mt-8 pt-6 border-t border-slate-800">
+                            <a href="#contact" class="block w-full text-center py-3.5 rounded-xl text-xs font-black <?php echo $isFeatured ? 'text-slate-950 bg-brand-500 hover:bg-brand-400' : 'text-slate-200 bg-slate-950 hover:bg-slate-900 border border-slate-800 hover:border-brand-500/30 hover:text-white shadow-sm'; ?> transition-all duration-200 hover:-translate-y-0.5">
                                 Select <?php echo htmlspecialchars($pkg['title']); ?>
                             </a>
                         </div>
@@ -135,19 +135,19 @@ if (empty($db_packages)) {
         <!-- Slider controls for mobile/tablet (Hidden on desktop) -->
         <div class="flex items-center justify-center gap-6 mt-8 md:hidden">
             <!-- Left Arrow -->
-            <button id="price-prev-btn" class="w-10 h-10 rounded-full border border-slate-250 bg-white hover:bg-slate-50 text-slate-600 flex items-center justify-center transition-colors">
+            <button id="price-prev-btn" class="w-10 h-10 rounded-full border border-slate-800 bg-slate-900 hover:bg-slate-850 text-slate-300 flex items-center justify-center transition-colors">
                 <i class="fa-solid fa-chevron-left text-xs"></i>
             </button>
             
             <!-- Dots Indicators -->
             <div class="flex gap-2" id="price-dots-container">
                 <?php foreach ($db_packages as $idx => $pkg): ?>
-                <button class="<?php echo $idx === 0 ? 'w-6 h-1.5 bg-brand-500' : 'w-1.5 h-1.5 bg-slate-350'; ?> rounded-full transition-all duration-300" data-index="<?php echo $idx; ?>" aria-label="Go to pricing slide <?php echo $idx + 1; ?>"></button>
+                <button class="<?php echo $idx === 0 ? 'w-6 h-1.5 bg-brand-500' : 'w-1.5 h-1.5 bg-slate-700'; ?> rounded-full transition-all duration-300" data-index="<?php echo $idx; ?>" aria-label="Go to pricing slide <?php echo $idx + 1; ?>"></button>
                 <?php endforeach; ?>
             </div>
 
             <!-- Right Arrow -->
-            <button id="price-next-btn" class="w-10 h-10 rounded-full border border-slate-250 bg-white hover:bg-slate-50 text-slate-650 flex items-center justify-center transition-colors">
+            <button id="price-next-btn" class="w-10 h-10 rounded-full border border-slate-800 bg-slate-900 hover:bg-slate-850 text-slate-300 flex items-center justify-center transition-colors">
                 <i class="fa-solid fa-chevron-right text-xs"></i>
             </button>
         </div>
@@ -182,7 +182,7 @@ if (empty($db_packages)) {
                 if (idx === currentIndex) {
                     dot.className = 'w-6 h-1.5 bg-brand-500 rounded-full transition-all duration-300';
                 } else {
-                    dot.className = 'w-1.5 h-1.5 bg-slate-300 rounded-full transition-all duration-300';
+                    dot.className = 'w-1.5 h-1.5 bg-slate-700 rounded-full transition-all duration-300';
                 }
             });
         }

@@ -87,7 +87,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $pdo !== null) {
             'stat_panel_count',
             'stat_panel_label',
             'stat_speed_count',
-            'stat_speed_label'
+            'stat_speed_label',
+            'seo_google_analytics',
+            'seo_search_console',
+            'seo_custom_head',
+            'seo_custom_footer',
+            'smtp_enabled',
+            'smtp_host',
+            'smtp_port',
+            'smtp_secure',
+            'smtp_username',
+            'smtp_password',
+            'smtp_receiver_email'
         ];
         
         $updateStmt = $pdo->prepare("INSERT INTO settings (setting_key, setting_value) VALUES (:key, :val) ON DUPLICATE KEY UPDATE setting_value = :val");
@@ -255,6 +266,17 @@ $testimonials = json_decode($webSettings['homepage_testimonials'] ?? '[]', true)
                     <a href="pricing_manager.php" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold hover:bg-slate-800 hover:text-white transition-all <?php echo (basename($_SERVER['PHP_SELF']) === 'pricing_manager.php') ? 'bg-brand-500/10 text-brand-400 border border-brand-500/20' : 'text-slate-400'; ?>">
                         <i class="fa-solid fa-tags text-sm"></i> <span class="whitespace-nowrap">Pricing Packages</span>
                     </a>
+                    <a href="platform_manager.php" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold hover:bg-slate-800 hover:text-white transition-all <?php echo (basename($_SERVER['PHP_SELF']) === 'platform_manager.php') ? 'bg-brand-500/10 text-brand-400 border border-brand-500/20' : 'text-slate-400'; ?>">
+                        <i class="fa-solid fa-earth-americas text-sm"></i> <span class="whitespace-nowrap">Global Operations</span>
+                    </a>
+                    <a href="seo_manager.php" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold hover:bg-slate-800 hover:text-white transition-all <?php echo (basename($_SERVER['PHP_SELF']) === 'seo_manager.php') ? 'bg-brand-500/10 text-brand-400 border border-brand-500/20' : 'text-slate-400'; ?>">
+                        <i class="fa-solid fa-search text-sm"></i> <span class="whitespace-nowrap">Page SEO Settings</span>
+                    </a>
+                    
+                    <span class="block px-3 py-1 text-[9px] font-extrabold text-slate-500 uppercase tracking-widest mt-6 mb-2 flex items-center gap-1.5"><i class="fa-solid fa-user-shield text-[9px]"></i> Account</span>
+                    <a href="change_password.php" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold hover:bg-slate-800 hover:text-white transition-all <?php echo (basename($_SERVER['PHP_SELF']) === 'change_password.php') ? 'bg-brand-500/10 text-brand-400 border border-brand-500/20' : 'text-slate-400'; ?>">
+                        <i class="fa-solid fa-key text-sm"></i> <span class="whitespace-nowrap">Change Password</span>
+                    </a>
                 </nav>
             </div>
 
@@ -274,27 +296,7 @@ $testimonials = json_decode($webSettings['homepage_testimonials'] ?? '[]', true)
         <div class="flex-grow flex flex-col min-w-0 bg-slate-50 overflow-hidden">
             
             <!-- Header bar with Sidebar Toggle & Logout -->
-            <header class="bg-white border-b border-slate-200 h-16 flex items-center justify-between px-6 flex-shrink-0">
-                <!-- Toggle Button -->
-                <div class="flex items-center gap-4">
-                    <button type="button" id="sidebar-toggle-btn" class="p-2.5 rounded-xl border border-slate-200 text-slate-650 hover:bg-slate-50 transition-colors flex items-center justify-center focus:outline-none">
-                        <i class="fa-solid fa-bars-staggered text-sm"></i>
-                    </button>
-                    <span class="text-sm font-black text-slate-900 hidden sm:inline-block uppercase tracking-wider">Compliance Settings Desk</span>
-                </div>
-
-                <!-- Admin Action items -->
-                <div class="flex items-center gap-4">
-                    <div class="hidden lg:flex items-center gap-2 px-3 py-1.5 bg-emerald-50 border border-emerald-500/10 rounded-full">
-                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                        <span class="text-[10px] font-bold text-slate-700">CA Panel Live</span>
-                    </div>
-                    
-                    <a href="logout.php" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-[10px] font-black text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors">
-                        <i class="fa-solid fa-right-from-bracket"></i> Logout
-                    </a>
-                </div>
-            </header>
+            <?php include_once 'admin_header.php'; ?>
 
             <!-- Scrollable Workspace Body -->
             <main class="flex-1 overflow-y-auto p-6 sm:p-8 space-y-8">
@@ -604,6 +606,122 @@ $testimonials = json_decode($webSettings['homepage_testimonials'] ?? '[]', true)
 
 
 
+                    <!-- Section 6: Global SEO Header Scripts & Google Analytics -->
+                    <div class="bg-white border border-slate-200 p-6 sm:p-8 rounded-3xl space-y-6 text-left">
+                        <div class="border-b border-slate-150 pb-3 flex items-center gap-2.5">
+                            <i class="fa-solid fa-code text-brand-500 text-sm"></i>
+                            <h3 class="text-sm font-extrabold text-slate-900 uppercase tracking-wider">Global SEO Tracking & Header Scripts</h3>
+                        </div>
+
+                        <div class="space-y-4">
+                            <!-- Google Analytics Script -->
+                            <div class="space-y-1.5">
+                                <label for="seo_google_analytics" class="text-xs font-extrabold uppercase tracking-widest text-slate-500 block font-sans">Google Analytics / Tag Manager Scripts</label>
+                                <p class="text-[10px] text-slate-400 font-semibold mb-1">Paste your entire Google Analytics tracking block here (inside script tags).</p>
+                                <textarea id="seo_google_analytics" name="seo_google_analytics" rows="4" 
+                                          class="w-full text-xs font-mono px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-brand-500 focus:bg-white focus:outline-none transition-all"><?php echo htmlspecialchars($webSettings['seo_google_analytics'] ?? ''); ?></textarea>
+                            </div>
+
+                            <!-- Google Search Console Verification -->
+                            <div class="space-y-1.5">
+                                <label for="seo_search_console" class="text-xs font-extrabold uppercase tracking-widest text-slate-500 block font-sans">Google Search Console Verification Tag</label>
+                                <p class="text-[10px] text-slate-400 font-semibold mb-1">Paste GSC verification meta tag (e.g. &lt;meta name="google-site-verification" content="..." /&gt;).</p>
+                                <input type="text" id="seo_search_console" name="seo_search_console" 
+                                       value="<?php echo htmlspecialchars($webSettings['seo_search_console'] ?? ''); ?>"
+                                       class="w-full text-xs font-mono px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-brand-500 focus:bg-white focus:outline-none transition-all">
+                            </div>
+
+                            <!-- Custom Head Scripts -->
+                            <div class="space-y-1.5">
+                                <label for="seo_custom_head" class="text-xs font-extrabold uppercase tracking-widest text-slate-500 block font-sans">Additional Header Scripts (&lt;head&gt; section)</label>
+                                <p class="text-[10px] text-slate-400 font-semibold mb-1">Custom meta tags, canonical link triggers, styles, or tracking pixels.</p>
+                                <textarea id="seo_custom_head" name="seo_custom_head" rows="4" 
+                                          class="w-full text-xs font-mono px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-brand-500 focus:bg-white focus:outline-none transition-all"><?php echo htmlspecialchars($webSettings['seo_custom_head'] ?? ''); ?></textarea>
+                            </div>
+
+                            <!-- Custom Footer Scripts -->
+                            <div class="space-y-1.5">
+                                <label for="seo_custom_footer" class="text-xs font-extrabold uppercase tracking-widest text-slate-500 block font-sans">Additional Footer Scripts (End of &lt;body&gt; section)</label>
+                                <p class="text-[10px] text-slate-400 font-semibold mb-1">Custom chatbot scripts, marketing trackers, or body tags.</p>
+                                <textarea id="seo_custom_footer" name="seo_custom_footer" rows="4" 
+                                          class="w-full text-xs font-mono px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-brand-500 focus:bg-white focus:outline-none transition-all"><?php echo htmlspecialchars($webSettings['seo_custom_footer'] ?? ''); ?></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 5: Email Notification Configurations (SMTP) -->
+                    <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/55 space-y-6">
+                        <div class="border-b border-slate-100 pb-5">
+                            <h3 class="text-base font-extrabold text-slate-900 flex items-center gap-2">
+                                <i class="fa-solid fa-envelope-circle-check text-brand-500"></i> Email Notifications & SMTP Setup
+                            </h3>
+                            <p class="text-xs text-slate-400 font-semibold mt-1">Configure automated lead notifications. Send form entries to your corporate inbox immediately.</p>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            
+                            <!-- Enabled/Disabled Toggle -->
+                            <div class="space-y-1.5 md:col-span-2">
+                                <label for="smtp_enabled" class="text-xs font-extrabold uppercase tracking-widest text-slate-500 block font-sans">Email Notifications Status</label>
+                                <select id="smtp_enabled" name="smtp_enabled" class="w-full text-xs font-semibold px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-brand-500 focus:bg-white focus:outline-none transition-all">
+                                    <option value="0" <?php echo ($webSettings['smtp_enabled'] ?? '0') === '0' ? 'selected' : ''; ?>>Disabled (DB Lead Recording Only)</option>
+                                    <option value="1" <?php echo ($webSettings['smtp_enabled'] ?? '0') === '1' ? 'selected' : ''; ?>>Enabled (Send Database Entry + Email Copy)</option>
+                                </select>
+                            </div>
+
+                            <!-- SMTP Host -->
+                            <div class="space-y-1.5">
+                                <label for="smtp_host" class="text-xs font-extrabold uppercase tracking-widest text-slate-500 block font-sans">SMTP Hostname</label>
+                                <input type="text" id="smtp_host" name="smtp_host" placeholder="smtp.gmail.com" 
+                                       value="<?php echo htmlspecialchars($webSettings['smtp_host'] ?? ''); ?>"
+                                       class="w-full text-xs font-semibold px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-brand-500 focus:bg-white focus:outline-none transition-all">
+                            </div>
+
+                            <!-- SMTP Port -->
+                            <div class="space-y-1.5">
+                                <label for="smtp_port" class="text-xs font-extrabold uppercase tracking-widest text-slate-500 block font-sans">SMTP Port</label>
+                                <input type="text" id="smtp_port" name="smtp_port" placeholder="465 (or 587)" 
+                                       value="<?php echo htmlspecialchars($webSettings['smtp_port'] ?? ''); ?>"
+                                       class="w-full text-xs font-semibold px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-brand-500 focus:bg-white focus:outline-none transition-all">
+                            </div>
+
+                            <!-- SMTP Encryption -->
+                            <div class="space-y-1.5">
+                                <label for="smtp_secure" class="text-xs font-extrabold uppercase tracking-widest text-slate-500 block font-sans">Connection Security</label>
+                                <select id="smtp_secure" name="smtp_secure" class="w-full text-xs font-semibold px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-brand-500 focus:bg-white focus:outline-none transition-all">
+                                    <option value="ssl" <?php echo ($webSettings['smtp_secure'] ?? 'ssl') === 'ssl' ? 'selected' : ''; ?>>SSL (Port 465 - Recommended)</option>
+                                    <option value="tls" <?php echo ($webSettings['smtp_secure'] ?? 'ssl') === 'tls' ? 'selected' : ''; ?>>TLS (Port 587)</option>
+                                    <option value="none" <?php echo ($webSettings['smtp_secure'] ?? 'ssl') === 'none' ? 'selected' : ''; ?>>None (Port 25)</option>
+                                </select>
+                            </div>
+
+                            <!-- SMTP Receiver Email -->
+                            <div class="space-y-1.5">
+                                <label for="smtp_receiver_email" class="text-xs font-extrabold uppercase tracking-widest text-slate-500 block font-sans">Notification Receiver Email</label>
+                                <input type="email" id="smtp_receiver_email" name="smtp_receiver_email" placeholder="notifications@zenvora.in" 
+                                       value="<?php echo htmlspecialchars($webSettings['smtp_receiver_email'] ?? ''); ?>"
+                                       class="w-full text-xs font-semibold px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-brand-500 focus:bg-white focus:outline-none transition-all">
+                            </div>
+
+                            <!-- SMTP Username -->
+                            <div class="space-y-1.5">
+                                <label for="smtp_username" class="text-xs font-extrabold uppercase tracking-widest text-slate-500 block font-sans">SMTP Username / Sender Email</label>
+                                <input type="text" id="smtp_username" name="smtp_username" placeholder="sender@gmail.com" 
+                                       value="<?php echo htmlspecialchars($webSettings['smtp_username'] ?? ''); ?>"
+                                       class="w-full text-xs font-semibold px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-brand-500 focus:bg-white focus:outline-none transition-all">
+                            </div>
+
+                            <!-- SMTP Password -->
+                            <div class="space-y-1.5">
+                                <label for="smtp_password" class="text-xs font-extrabold uppercase tracking-widest text-slate-500 block font-sans">SMTP Password / Passcode</label>
+                                <input type="password" id="smtp_password" name="smtp_password" placeholder="••••••••" 
+                                       value="<?php echo htmlspecialchars($webSettings['smtp_password'] ?? ''); ?>"
+                                       class="w-full text-xs font-semibold px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-brand-500 focus:bg-white focus:outline-none transition-all">
+                            </div>
+
+                        </div>
+                    </div>
+
                     <!-- Submit Actions -->
                     <div class="flex items-center justify-end pt-2">
                         <button type="submit" class="inline-flex items-center gap-2 px-8 py-4 rounded-full text-xs font-black text-white bg-slate-900 hover:bg-slate-800 transition-colors">
@@ -622,13 +740,6 @@ $testimonials = json_decode($webSettings['homepage_testimonials'] ?? '[]', true)
     <!-- Sidebar toggle & Dynamic Form scripts -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // Sidebar Toggle
-            const sidebar = document.getElementById('admin-sidebar');
-            const toggleBtn = document.getElementById('sidebar-toggle-btn');
-            toggleBtn.addEventListener('click', () => {
-                sidebar.classList.toggle('w-64');
-                sidebar.classList.toggle('w-0');
-            });
 
             // Load Existing Dynamic Phones
             <?php foreach ($phones as $p): ?>
